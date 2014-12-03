@@ -193,18 +193,29 @@ class FSM(object):
         for transition in self.run_iter(event, initialize=initialize):
             pass
 
-    def copy(self):
+    def copy(self, shallow=False):
         """Copies the current state machine.
 
         NOTE(harlowja): the copy will be left in an *uninitialized* state.
+
+        NOTE(harlowja): when a shallow copy is requested the copy will share
+                        the same transition table and state table as the
+                        source; this can be advantageous if you have a machine
+                        and transitions + states that is defined somewhere
+                        and want to use copies to run with (the copies have
+                        the current state that is different between machines).
         """
         c = FSM(self.start_state)
-        for state, data in six.iteritems(self._states):
-            copied_data = data.copy()
-            copied_data['reactions'] = copied_data['reactions'].copy()
-            c._states[state] = copied_data
-        for state, data in six.iteritems(self._transitions):
-            c._transitions[state] = data.copy()
+        if not shallow:
+            for state, data in six.iteritems(self._states):
+                copied_data = data.copy()
+                copied_data['reactions'] = copied_data['reactions'].copy()
+                c._states[state] = copied_data
+            for state, data in six.iteritems(self._transitions):
+                c._transitions[state] = data.copy()
+        else:
+            c._transitions = self._transitions
+            c._states = self._states
         return c
 
     def run_iter(self, event, initialize=True):

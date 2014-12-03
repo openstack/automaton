@@ -19,6 +19,7 @@ try:
 except ImportError:
     from ordereddict import OrderedDict  # noqa
 
+import prettytable
 import six
 
 from automaton import exceptions as excp
@@ -274,7 +275,7 @@ class FSM(object):
 
         **Example**::
 
-            >>> from taskflow.types import fsm
+            >>> from automaton import fsm
             >>> f = fsm.FSM("sits")
             >>> f.add_state("sits")
             >>> f.add_state("barks")
@@ -285,20 +286,20 @@ class FSM(object):
             >>> f.add_transition("wags tail", "barks", "squirrel!")
             >>> print(f.pformat())
             +-----------+-------------+-----------+----------+---------+
-                Start   |    Event    |    End    | On Enter | On Exit
+            |   Start   |    Event    |    End    | On Enter | On Exit |
             +-----------+-------------+-----------+----------+---------+
-                barks   | gets petted | wags tail |          |
-               sits[^]  |  squirrel!  |   barks   |          |
-              wags tail | gets petted |   sits    |          |
-              wags tail |  squirrel!  |   barks   |          |
+            |   barks   | gets petted | wags tail |          |         |
+            |  sits[^]  |  squirrel!  |   barks   |          |         |
+            | wags tail | gets petted |    sits   |          |         |
+            | wags tail |  squirrel!  |   barks   |          |         |
             +-----------+-------------+-----------+----------+---------+
         """
         def orderedkeys(data):
             if sort:
                 return sorted(six.iterkeys(data))
             return list(six.iterkeys(data))
-        tbl = table.PleasantTable(["Start", "Event", "End",
-                                   "On Enter", "On Exit"])
+        tbl = prettytable.PrettyTable(["Start", "Event", "End",
+                                       "On Enter", "On Exit"])
         for state in orderedkeys(self._states):
             prefix_markings = []
             if self.current_state == state:
@@ -332,4 +333,4 @@ class FSM(object):
                     tbl.add_row(row)
             else:
                 tbl.add_row([pretty_state, "", "", "", ""])
-        return tbl.pformat()
+        return tbl.get_string()

@@ -58,7 +58,11 @@ class FSM(object):
         self._states = OrderedDict()
         self._start_state = start_state
         self._current = None
-        self.frozen = False
+        self._frozen = False
+
+    @property
+    def frozen(self):
+        return self._frozen
 
     @property
     def start_state(self):
@@ -206,6 +210,7 @@ class FSM(object):
                         the current state that is different between machines).
         """
         c = FSM(self.start_state)
+        c._frozen = self._frozen
         if not shallow:
             for state, data in six.iteritems(self._states):
                 copied_data = data.copy()
@@ -256,7 +261,7 @@ class FSM(object):
 
     def freeze(self):
         """Freezes & stops addition of states, transitions, reactions..."""
-        self.frozen = True
+        self._frozen = True
 
     @property
     def states(self):

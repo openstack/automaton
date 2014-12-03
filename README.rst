@@ -1,0 +1,4 @@
+Automaton
+=========
+
+Machines for python.

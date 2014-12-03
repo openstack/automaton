@@ -1,4 +1,0 @@
-automaton
-=========
-
-Machines for python

@@ -197,7 +197,7 @@ class FSM(object):
         for transition in self.run_iter(event, initialize=initialize):
             pass
 
-    def copy(self, shallow=False):
+    def copy(self, shallow=False, unfreeze=False):
         """Copies the current state machine.
 
         NOTE(harlowja): the copy will be left in an *uninitialized* state.
@@ -210,7 +210,10 @@ class FSM(object):
                         the current state that is different between machines).
         """
         c = FSM(self.start_state)
-        c._frozen = self._frozen
+        if unfreeze and self._frozen:
+            c._frozen = False
+        else:
+            c._frozen = self._frozen
         if not shallow:
             for state, data in six.iteritems(self._states):
                 copied_data = data.copy()

@@ -203,6 +203,13 @@ class FSMTest(testcase.TestCase):
                           self.jumper.add_reaction,
                           'test', 'test', lambda *args: 'test')
 
+    def test_freeze_copy_unfreeze(self):
+        self.jumper.freeze()
+        self.assertTrue(self.jumper.frozen)
+        cp = self.jumper.copy(unfreeze=True)
+        self.assertTrue(self.jumper.frozen)
+        self.assertFalse(cp.frozen)
+
     def test_invalid_callbacks(self):
         m = fsm.FSM('working')
         m.add_state('working')

@@ -73,13 +73,17 @@ class FiniteMachine(object):
         return cls._Effect(new_state['reactions'].get(event),
                            new_state["terminal"])
 
+    @staticmethod
+    def _generate_runner(instance):
+        return _FiniteRunner(instance)
+
     def __init__(self, start_state):
         self._transitions = {}
         self._states = OrderedDict()
         self._start_state = start_state
         self._current = None
         self._frozen = False
-        self._runner = _FiniteRunner(self)
+        self._runner = self._generate_runner(self)
 
     @property
     def runner(self):
@@ -367,9 +371,9 @@ class HierarchicalFiniteMachine(FiniteMachine):
     _Effect = collections.namedtuple('_Effect',
                                      'reaction,terminal,machine')
 
-    def __init__(self, start_state):
-        super(HierarchicalFiniteMachine, self).__init__(start_state)
-        self._runner = _HierarchicalRunner(self)
+    @staticmethod
+    def _generate_runner(instance):
+        return _HierarchicalRunner(instance)
 
     @classmethod
     def _effect_builder(cls, new_state, event):

@@ -264,8 +264,8 @@ class Machine(object):
 
         **Example**::
 
-            >>> from automaton import fsm
-            >>> f = fsm.FSM("sits")
+            >>> from automaton.machines import finite
+            >>> f = finite.Machine("sits")
             >>> f.add_state("sits")
             >>> f.add_state("barks")
             >>> f.add_state("wags tail")

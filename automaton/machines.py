@@ -61,7 +61,7 @@ class FiniteMachine(object):
         self._start_state = start_state
         self._current = None
         self._frozen = False
-        self._runner = _Runner(self)
+        self._runner = _FiniteRunner(self)
 
     @property
     def runner(self):
@@ -325,8 +325,8 @@ class FiniteMachine(object):
         return tbl.get_string()
 
 
-class _Runner(object):
-    """Machine helper that can be used to run a state machine."""
+class _FiniteRunner(object):
+    """Finit machine helper that can be used to run a finite state machine."""
 
     def __init__(self, machine):
         self._machine = weakref.proxy(machine)

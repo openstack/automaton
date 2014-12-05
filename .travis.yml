@@ -6,8 +6,12 @@ python:
   - "3.4"
 # command to install dependencies
 install:
+  - "if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install -r requirements-py2.txt; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install -r requirements-py2.txt; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then pip install -r requirements-py3.txt; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pip install -r requirements-py3.txt; fi"
+  - "pip install -r test-requirements.txt"
   - "pip install ."
-  - "pip install -r requirements.txt -r test-requirements.txt"
 # command to run tests
 script: nosetests
 

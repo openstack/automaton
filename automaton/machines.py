@@ -49,19 +49,20 @@ class FiniteMachine(object):
     This state machine can be used to automatically run a given set of
     transitions and states in response to events (either from callbacks or from
     generator/iterator send() values, see PEP 342). On each triggered event, a
-    on_enter and on_exit callback can also be provided which will be called to
-    perform some type of action on leaving a prior state and before entering a
-    new state.
+    ``on_enter`` and ``on_exit`` callback can also be provided which will be
+    called to perform some type of action on leaving a prior state and before
+    entering a new state.
 
     NOTE(harlowja): reactions will *only* be called when the generator/iterator
-    from run_iter() does *not* send back a new event (they will always be
-    called if the run() method is used). This allows for two unique ways (these
-    ways can also be intermixed) to use this state machine when using
-    run_iter(); one where *external* events trigger the next state transition
-    and one where *internal* reaction callbacks trigger the next state
-    transition. The other way to use this state machine is to skip using run()
-    or run_iter() completely and use the process_event() method explicitly and
-    trigger the events via some *external* functionality.
+    from ``runner.run_iter()`` does *not* send back a new event (they will
+    always be called if the ``runner.run()`` method is used). This allows for
+    two unique ways (these ways can also be intermixed) to use this state
+    machine when using ``runner.run_iter()``; one where *external* events
+    trigger the next state transition and one where *internal* reaction
+    callbacks trigger the next state transition. The other way to use this
+    state machine is to skip using ``runner.run()`` or ``runner.run_iter()``
+    completely and use the ``process_event()`` method explicitly and trigger
+    the events via some *external* functionality/triggers...
     """
 
     # Result of processing an event (cause and effect...)

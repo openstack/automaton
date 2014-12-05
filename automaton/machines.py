@@ -28,6 +28,13 @@ import six
 from automaton import exceptions as excp
 
 
+def _orderedkeys(data, sort=True):
+    if sort:
+        return sorted(six.iterkeys(data))
+    else:
+        return list(six.iterkeys(data))
+
+
 class _Jump(object):
     """A FSM transition tracks this data while jumping."""
     def __init__(self, name, on_enter, on_exit):
@@ -262,41 +269,16 @@ class FiniteMachine(object):
             for event, target in six.iteritems(self._transitions[state]):
                 yield (state, event, target.name)
 
-    def pformat(self, sort=True):
+    def pformat(self, sort=True, empty='.'):
         """Pretty formats the state + transition table into a string.
 
         NOTE(harlowja): the sort parameter can be provided to sort the states
         and transitions by sort order; with it being provided as false the rows
         will be iterated in addition order instead.
-
-        **Example**::
-
-            >>> from automaton.machines import finite
-            >>> f = finite.Machine("sits")
-            >>> f.add_state("sits")
-            >>> f.add_state("barks")
-            >>> f.add_state("wags tail")
-            >>> f.add_transition("sits", "barks", "squirrel!")
-            >>> f.add_transition("barks", "wags tail", "gets petted")
-            >>> f.add_transition("wags tail", "sits", "gets petted")
-            >>> f.add_transition("wags tail", "barks", "squirrel!")
-            >>> print(f.pformat())
-            +-----------+-------------+-----------+----------+---------+
-            |   Start   |    Event    |    End    | On Enter | On Exit |
-            +-----------+-------------+-----------+----------+---------+
-            |   barks   | gets petted | wags tail |          |         |
-            |  sits[^]  |  squirrel!  |   barks   |          |         |
-            | wags tail | gets petted |    sits   |          |         |
-            | wags tail |  squirrel!  |   barks   |          |         |
-            +-----------+-------------+-----------+----------+---------+
         """
-        def orderedkeys(data):
-            if sort:
-                return sorted(six.iterkeys(data))
-            return list(six.iterkeys(data))
         tbl = prettytable.PrettyTable(["Start", "Event", "End",
                                        "On Enter", "On Exit"])
-        for state in orderedkeys(self._states):
+        for state in _orderedkeys(self._states, sort=sort):
             prefix_markings = []
             if self.current_state == state:
                 prefix_markings.append("@")
@@ -309,7 +291,8 @@ class FiniteMachine(object):
             if postfix_markings:
                 pretty_state += "[%s]" % "".join(postfix_markings)
             if self._transitions[state]:
-                for event in orderedkeys(self._transitions[state]):
+                for event in _orderedkeys(self._transitions[state],
+                                          sort=sort):
                     target = self._transitions[state][event]
                     row = [pretty_state, event, target.name]
                     if target.on_enter is not None:
@@ -318,17 +301,17 @@ class FiniteMachine(object):
                         except AttributeError:
                             row.append(target.on_enter)
                     else:
-                        row.append('')
+                        row.append(empty)
                     if target.on_exit is not None:
                         try:
                             row.append(target.on_exit.__name__)
                         except AttributeError:
                             row.append(target.on_exit)
                     else:
-                        row.append('')
+                        row.append(empty)
                     tbl.add_row(row)
             else:
-                tbl.add_row([pretty_state, "", "", "", ""])
+                tbl.add_row([pretty_state, empty, empty, empty, empty])
         return tbl.get_string()
 
 

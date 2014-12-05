@@ -19,6 +19,8 @@ try:
 except ImportError:
     from ordereddict import OrderedDict  # noqa
 
+import weakref
+
 import prettytable
 import six
 
@@ -33,7 +35,7 @@ class _Jump(object):
         self.on_exit = on_exit
 
 
-class FSM(object):
+class Machine(object):
     """A finite state machine.
 
     This state machine can be used to automatically run a given set of
@@ -59,6 +61,11 @@ class FSM(object):
         self._start_state = start_state
         self._current = None
         self._frozen = False
+        self._runner = _Runner(self)
+
+    @property
+    def runner(self):
+        return self._runner
 
     @property
     def frozen(self):
@@ -192,11 +199,6 @@ class FSM(object):
                                     " state '%s'" % (self._start_state))
         self._current = _Jump(self._start_state, None, None)
 
-    def run(self, event, initialize=True):
-        """Runs the state machine, using reactions only."""
-        for transition in self.run_iter(event, initialize=initialize):
-            pass
-
     def copy(self, shallow=False, unfreeze=False):
         """Copies the current state machine.
 
@@ -209,7 +211,7 @@ class FSM(object):
                         and want to use copies to run with (the copies have
                         the current state that is different between machines).
         """
-        c = FSM(self.start_state)
+        c = Machine(self.start_state)
         if unfreeze and self._frozen:
             c._frozen = False
         else:
@@ -225,38 +227,6 @@ class FSM(object):
             c._transitions = self._transitions
             c._states = self._states
         return c
-
-    def run_iter(self, event, initialize=True):
-        """Returns a iterator/generator that will run the state machine.
-
-        NOTE(harlowja): only one runner iterator/generator should be active for
-        a machine, if this is not observed then it is possible for
-        initialization and other local state to be corrupted and cause issues
-        when running...
-        """
-        if initialize:
-            self.initialize()
-        while True:
-            old_state = self.current_state
-            reaction, terminal = self.process_event(event)
-            new_state = self.current_state
-            try:
-                sent_event = yield (old_state, new_state)
-            except GeneratorExit:
-                break
-            if terminal:
-                break
-            if reaction is None and sent_event is None:
-                raise excp.NotFound("Unable to progress since no reaction (or"
-                                    " sent event) has been made available in"
-                                    " new state '%s' (moved to from state '%s'"
-                                    " in response to event '%s')"
-                                    % (new_state, old_state, event))
-            elif sent_event is not None:
-                event = sent_event
-            else:
-                cb, args, kwargs = reaction
-                event = cb(old_state, new_state, event, *args, **kwargs)
 
     def __contains__(self, state):
         """Returns if this state exists in the machines known states."""
@@ -353,3 +323,47 @@ class FSM(object):
             else:
                 tbl.add_row([pretty_state, "", "", "", ""])
         return tbl.get_string()
+
+
+class _Runner(object):
+    """Machine helper that can be used to run a state machine."""
+
+    def __init__(self, machine):
+        self._machine = weakref.proxy(machine)
+
+    def run(self, event, initialize=True):
+        """Runs the state machine, using reactions only."""
+        for transition in self.run_iter(event, initialize=initialize):
+            pass
+
+    def run_iter(self, event, initialize=True):
+        """Returns a iterator/generator that will run the state machine.
+
+        NOTE(harlowja): only one runner iterator/generator should be active for
+        a machine, if this is not observed then it is possible for
+        initialization and other local state to be corrupted and cause issues
+        when running...
+        """
+        if initialize:
+            self._machine.initialize()
+        while True:
+            old_state = self._machine.current_state
+            reaction, terminal = self._machine.process_event(event)
+            new_state = self._machine.current_state
+            try:
+                sent_event = yield (old_state, new_state)
+            except GeneratorExit:
+                break
+            if terminal:
+                break
+            if reaction is None and sent_event is None:
+                raise excp.NotFound("Unable to progress since no reaction (or"
+                                    " sent event) has been made available in"
+                                    " new state '%s' (moved to from state '%s'"
+                                    " in response to event '%s')"
+                                    % (new_state, old_state, event))
+            elif sent_event is not None:
+                event = sent_event
+            else:
+                cb, args, kwargs = reaction
+                event = cb(old_state, new_state, event, *args, **kwargs)

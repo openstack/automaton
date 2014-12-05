@@ -15,7 +15,7 @@
 #    under the License.
 
 from automaton import exceptions as excp
-from automaton import fsm
+from automaton.machines import finite
 
 import six
 from testtools import testcase
@@ -25,7 +25,7 @@ class FSMTest(testcase.TestCase):
     def setUp(self):
         super(FSMTest, self).setUp()
         # NOTE(harlowja): this state machine will never stop if run() is used.
-        self.jumper = fsm.FSM("down")
+        self.jumper = finite.Machine("down")
         self.jumper.add_state('up')
         self.jumper.add_state('down')
         self.jumper.add_transition('down', 'up', 'jump')
@@ -34,17 +34,17 @@ class FSMTest(testcase.TestCase):
         self.jumper.add_reaction('down', 'fall', lambda *args: 'jump')
 
     def test_bad_start_state(self):
-        m = fsm.FSM('unknown')
-        self.assertRaises(excp.NotFound, m.run, 'unknown')
+        m = finite.Machine('unknown')
+        self.assertRaises(excp.NotFound, m.runner.run, 'unknown')
 
     def test_contains(self):
-        m = fsm.FSM('unknown')
+        m = finite.Machine('unknown')
         self.assertNotIn('unknown', m)
         m.add_state('unknown')
         self.assertIn('unknown', m)
 
     def test_duplicate_state(self):
-        m = fsm.FSM('unknown')
+        m = finite.Machine('unknown')
         m.add_state('unknown')
         self.assertRaises(excp.Duplicate, m.add_state, 'unknown')
 
@@ -55,7 +55,7 @@ class FSMTest(testcase.TestCase):
             self.jumper.add_reaction, 'down', 'fall', lambda *args: 'skate')
 
     def test_bad_transition(self):
-        m = fsm.FSM('unknown')
+        m = finite.Machine('unknown')
         m.add_state('unknown')
         m.add_state('fire')
         self.assertRaises(excp.NotFound, m.add_transition,
@@ -64,13 +64,13 @@ class FSMTest(testcase.TestCase):
                           'something', 'unknown', 'boom')
 
     def test_bad_reaction(self):
-        m = fsm.FSM('unknown')
+        m = finite.Machine('unknown')
         m.add_state('unknown')
         self.assertRaises(excp.NotFound, m.add_reaction, 'something', 'boom',
                           lambda *args: 'cough')
 
     def test_run(self):
-        m = fsm.FSM('down')
+        m = finite.Machine('down')
         m.add_state('down')
         m.add_state('up')
         m.add_state('broken', terminal=True)
@@ -82,10 +82,12 @@ class FSMTest(testcase.TestCase):
         m.initialize()
         self.assertEqual('down', m.current_state)
         self.assertFalse(m.terminated)
-        m.run('jump')
+        m_runner = m.runner
+        m_runner.run('jump')
         self.assertTrue(m.terminated)
         self.assertEqual('broken', m.current_state)
-        self.assertRaises(excp.InvalidState, m.run, 'jump', initialize=False)
+        self.assertRaises(excp.InvalidState, m_runner.run,
+                          'jump', initialize=False)
 
     def test_on_enter_on_exit(self):
         enter_transitions = []
@@ -97,7 +99,7 @@ class FSMTest(testcase.TestCase):
         def on_enter(state, event):
             enter_transitions.append((state, event))
 
-        m = fsm.FSM('start')
+        m = finite.Machine('start')
         m.add_state('start', on_exit=on_exit)
         m.add_state('down', on_enter=on_enter, on_exit=on_exit)
         m.add_state('up', on_enter=on_enter, on_exit=on_exit)
@@ -115,7 +117,8 @@ class FSMTest(testcase.TestCase):
 
     def test_run_iter(self):
         up_downs = []
-        for (old_state, new_state) in self.jumper.run_iter('jump'):
+        runner = self.jumper.runner
+        for (old_state, new_state) in runner.run_iter('jump'):
             up_downs.append((old_state, new_state))
             if len(up_downs) >= 3:
                 break
@@ -128,7 +131,8 @@ class FSMTest(testcase.TestCase):
 
     def test_run_send(self):
         up_downs = []
-        it = self.jumper.run_iter('jump')
+        runner = self.jumper.runner
+        it = runner.run_iter('jump')
         while True:
             up_downs.append(it.send(None))
             if len(up_downs) >= 3:
@@ -142,7 +146,8 @@ class FSMTest(testcase.TestCase):
 
     def test_run_send_fail(self):
         up_downs = []
-        it = self.jumper.run_iter('jump')
+        runner = self.jumper.runner
+        it = runner.run_iter('jump')
         up_downs.append(six.next(it))
         self.assertRaises(excp.NotFound, it.send, 'fail')
         it.close()
@@ -153,7 +158,7 @@ class FSMTest(testcase.TestCase):
                           self.jumper.process_event, 'jump')
 
     def test_copy_states(self):
-        c = fsm.FSM('down')
+        c = finite.Machine('down')
         self.assertEqual(0, len(c.states))
         d = c.copy()
         c.add_state('up')
@@ -162,7 +167,7 @@ class FSMTest(testcase.TestCase):
         self.assertEqual(0, len(d.states))
 
     def test_copy_reactions(self):
-        c = fsm.FSM('down')
+        c = finite.Machine('down')
         d = c.copy()
 
         c.add_state('down')
@@ -181,7 +186,7 @@ class FSMTest(testcase.TestCase):
         j = self.jumper.copy()
         self.assertIsNone(j.current_state)
 
-        for i, transition in enumerate(self.jumper.run_iter('jump')):
+        for i, transition in enumerate(self.jumper.runner.run_iter('jump')):
             if i == 4:
                 break
 
@@ -211,7 +216,7 @@ class FSMTest(testcase.TestCase):
         self.assertFalse(cp.frozen)
 
     def test_invalid_callbacks(self):
-        m = fsm.FSM('working')
+        m = finite.Machine('working')
         m.add_state('working')
         m.add_state('broken')
         self.assertRaises(ValueError, m.add_state, 'b', on_enter=2)

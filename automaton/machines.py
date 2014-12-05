@@ -35,7 +35,7 @@ class _Jump(object):
         self.on_exit = on_exit
 
 
-class Machine(object):
+class FiniteMachine(object):
     """A finite state machine.
 
     This state machine can be used to automatically run a given set of
@@ -211,7 +211,7 @@ class Machine(object):
                         and want to use copies to run with (the copies have
                         the current state that is different between machines).
         """
-        c = Machine(self.start_state)
+        c = FiniteMachine(self.start_state)
         if unfreeze and self._frozen:
             c._frozen = False
         else:

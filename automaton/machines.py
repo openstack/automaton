@@ -420,6 +420,34 @@ class _HierarchicalRunner(object):
         for transition in self.run_iter(event, initialize=initialize):
             pass
 
+    @staticmethod
+    def _process_event(machines, event):
+        """Matches a event to the machine hierarchy.
+
+        If the lowest level machine does not handle the event, then the
+        parent machine is referred to and so on, until there is only one
+        machine left which *must* handle the event.
+
+        The machine whose ``process_event`` does not throw invalid state or
+        not found exceptions is expected to be the machine that should
+        continue handling events...
+        """
+        while True:
+            machine = machines[-1]
+            try:
+                result = machine.process_event(event)
+            except (excp.InvalidState, excp.NotFound):
+                if len(machines) == 1:
+                    raise
+                else:
+                    current = machine._current
+                    if current is not None and current.on_exit is not None:
+                        current.on_exit(current.name, event)
+                    machine._current = None
+                    machines.pop()
+            else:
+                return result
+
     def run_iter(self, event, initialize=True):
         """Returns a iterator/generator that will run the state machine.
 
@@ -435,40 +463,9 @@ class _HierarchicalRunner(object):
         machines = [self._machine]
         if initialize:
             machines[-1].initialize()
-
-        # TODO(harlowja): we might want to refactor this generator to be
-        # easier to introspect the running state while iteration is occuring
-        # instead of it being encoded/hidden in this function...
-        def process_event(event):
-            """Matches a event to the machine hierarchy.
-
-            If the lowest level machine does not handle the event, then the
-            parent machine is referred to and so on, until there is only one
-            machine left which *must* handle the event.
-
-            The machine whose process_event does not throw invalid state or
-            not found exceptions is expected to be the machine that should
-            continue handling events...
-            """
-            while True:
-                machine = machines[-1]
-                try:
-                    result = machine.process_event(event)
-                except (excp.InvalidState, excp.NotFound):
-                    if len(machines) == 1:
-                        raise
-                    else:
-                        current = machine._current
-                        if current is not None and current.on_exit is not None:
-                            current.on_exit(current.name, event)
-                        machine._current = None
-                        machines.pop()
-                else:
-                    return result
-
         while True:
             old_state = machines[-1].current_state
-            effect = process_event(event)
+            effect = self._process_event(machines, event)
             new_state = machines[-1].current_state
             try:
                 machine = effect.machine

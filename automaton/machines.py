@@ -82,16 +82,12 @@ class FiniteMachine(object):
         self._states = OrderedDict()
         self._start_state = start_state
         self._current = None
-        self._frozen = False
         self._runner = self._generate_runner(self)
+        self.frozen = False
 
     @property
     def runner(self):
         return self._runner
-
-    @property
-    def frozen(self):
-        return self._frozen
 
     @property
     def start_state(self):
@@ -231,10 +227,10 @@ class FiniteMachine(object):
                         the current state that is different between machines).
         """
         c = FiniteMachine(self.start_state)
-        if unfreeze and self._frozen:
-            c._frozen = False
+        if unfreeze and self.frozen:
+            c.frozen = False
         else:
-            c._frozen = self._frozen
+            c.frozen = self.frozen
         if not shallow:
             for state, data in six.iteritems(self._states):
                 copied_data = data.copy()
@@ -253,7 +249,7 @@ class FiniteMachine(object):
 
     def freeze(self):
         """Freezes & stops addition of states, transitions, reactions..."""
-        self._frozen = True
+        self.frozen = True
 
     @property
     def states(self):

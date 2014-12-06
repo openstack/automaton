@@ -27,6 +27,11 @@ import six
 
 from automaton import exceptions as excp
 
+_JUMPER_NOT_FOUND_TPL = ("Unable to progress since no reaction (or"
+                         " sent event) has been made available in"
+                         " new state '%s' (moved to from state '%s'"
+                         " in response to event '%s')")
+
 
 def _orderedkeys(data, sort=True):
     if sort:
@@ -344,11 +349,9 @@ class _FiniteRunner(object):
             if terminal:
                 break
             if reaction is None and sent_event is None:
-                raise excp.NotFound("Unable to progress since no reaction (or"
-                                    " sent event) has been made available in"
-                                    " new state '%s' (moved to from state '%s'"
-                                    " in response to event '%s')"
-                                    % (new_state, old_state, event))
+                raise excp.NotFound(_JUMPER_NOT_FOUND_TPL % (new_state,
+                                                             old_state,
+                                                             event))
             elif sent_event is not None:
                 event = sent_event
             else:
@@ -465,11 +468,9 @@ class _HierarchicalRunner(object):
                 # events if they wish to have the root machine terminate...
                 break
             if effect.reaction is None and sent_event is None:
-                raise excp.NotFound("Unable to progress since no reaction (or"
-                                    " sent event) has been made available in"
-                                    " new state '%s' (moved to from state '%s'"
-                                    " in response to event '%s')"
-                                    % (new_state, old_state, event))
+                raise excp.NotFound(_JUMPER_NOT_FOUND_TPL % (new_state,
+                                                             old_state,
+                                                             event))
             elif sent_event is not None:
                 event = sent_event
             else:

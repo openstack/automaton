@@ -183,8 +183,7 @@ class FiniteMachine(object):
                                                 self._states[end]['on_enter'],
                                                 self._states[start]['on_exit'])
 
-    def process_event(self, event):
-        """Trigger a state change in response to the provided event."""
+    def _pre_process_event(self, event):
         current = self._current
         if current is None:
             raise excp.NotInitialized("Can only process events after"
@@ -197,13 +196,22 @@ class FiniteMachine(object):
             raise excp.NotFound("Can not transition from state '%s' on"
                                 " event '%s' (no defined transition)"
                                 % (current.name, event))
+
+    def _post_process_event(self, event, result):
+        return result
+
+    def process_event(self, event):
+        """Trigger a state change in response to the provided event."""
+        self._pre_process_event(event)
+        current = self._current
         replacement = self._transitions[current.name][event]
         if current.on_exit is not None:
             current.on_exit(current.name, event)
         if replacement.on_enter is not None:
             replacement.on_enter(replacement.name, event)
         self._current = replacement
-        return self._effect_builder(self._states[replacement.name], event)
+        result = self._effect_builder(self._states[replacement.name], event)
+        return self._post_process_event(event, result)
 
     def initialize(self):
         """Sets up the state machine (sets current state to start state...)."""

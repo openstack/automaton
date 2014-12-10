@@ -186,8 +186,9 @@ class FiniteMachine(object):
     def _pre_process_event(self, event):
         current = self._current
         if current is None:
-            raise excp.NotInitialized("Can only process events after"
-                                      " being initialized (not before)")
+            raise excp.NotInitialized("Can not process event '%s'; the state"
+                                      " machine hasn't been initialized"
+                                      % event)
         if self._states[current.name]['terminal']:
             raise excp.InvalidState("Can not transition from terminal"
                                     " state '%s' on event '%s'"

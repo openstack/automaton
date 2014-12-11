@@ -28,9 +28,10 @@ class FSMTest(testcase.TestCase):
 
     @staticmethod
     def _create_fsm(start_state, add_start=True, add_states=None):
-        m = machines.FiniteMachine(start_state)
+        m = machines.FiniteMachine()
         if add_start:
             m.add_state(start_state)
+            m.default_start_state = start_state
         if add_states:
             for s in add_states:
                 if s in m:
@@ -116,7 +117,7 @@ class FSMTest(testcase.TestCase):
         m.add_transition('down', 'up', 'jump')
         m.add_transition('up', 'down', 'fall')
 
-        m.initialize()
+        m.initialize('start')
         m.process_event('beat')
         m.process_event('jump')
         m.process_event('fall')
@@ -236,11 +237,12 @@ class HFSMTest(FSMTest):
     def _create_fsm(start_state,
                     add_start=True, hierarchical=False, add_states=None):
         if hierarchical:
-            m = machines.HierarchicalFiniteMachine(start_state)
+            m = machines.HierarchicalFiniteMachine()
         else:
-            m = machines.FiniteMachine(start_state)
+            m = machines.FiniteMachine()
         if add_start:
             m.add_state(start_state)
+            m.default_start_state = start_state
         if add_states:
             for s in add_states:
                 if s not in m:

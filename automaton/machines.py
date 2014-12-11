@@ -238,7 +238,7 @@ class FiniteMachine(object):
                         and want to use copies to run with (the copies have
                         the current state that is different between machines).
         """
-        c = self.__class__(self.start_state)
+        c = type(self)(self.start_state)
         if unfreeze and self.frozen:
             c.frozen = False
         else:

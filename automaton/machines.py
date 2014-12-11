@@ -94,7 +94,8 @@ class FiniteMachine(object):
     def default_start_state(self):
         return self._default_start_state
 
-    def set_default_start_state(self, state):
+    @default_start_state.setter
+    def default_start_state(self, state):
         """Sets the *default* start state that the machine should use.
 
         NOTE(harlowja): this will be used by ``initialize`` but only if that

@@ -123,7 +123,8 @@ class FSMTest(testcase.TestCase):
         m.process_event('fall')
         self.assertEqual([('down', 'beat'),
                           ('up', 'jump'), ('down', 'fall')], enter_transitions)
-        self.assertEqual([('down', 'jump'), ('up', 'fall')], exit_transitions)
+        self.assertEqual([('start', 'beat'), ('down', 'jump'), ('up', 'fall')],
+                         exit_transitions)
 
     def test_run_iter(self):
         up_downs = []

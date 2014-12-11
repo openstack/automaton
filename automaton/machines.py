@@ -78,7 +78,7 @@ class FiniteMachine(object):
         return cls._Effect(new_state['reactions'].get(event),
                            new_state["terminal"])
 
-    def __init__(self, start_state):
+    def __init__(self, start_state, add_start=False):
         self._transitions = {}
         self._states = OrderedDict()
         self._start_state = start_state
@@ -214,15 +214,17 @@ class FiniteMachine(object):
         result = self._effect_builder(self._states[replacement.name], event)
         return self._post_process_event(event, result)
 
-    def initialize(self):
+    def initialize(self, start_state=None):
         """Sets up the state machine (sets current state to start state...)."""
-        if self._start_state not in self._states:
+        if start_state is None:
+            start_state = self._start_state
+        if start_state not in self._states:
             raise excp.NotFound("Can not start from a undefined"
-                                " state '%s'" % (self._start_state))
-        if self._states[self._start_state]['terminal']:
+                                " state '%s'" % (start_state))
+        if self._states[start_state]['terminal']:
             raise excp.InvalidState("Can not start from a terminal"
-                                    " state '%s'" % (self._start_state))
-        self._current = _Jump(self._start_state, None, None)
+                                    " state '%s'" % (start_state))
+        self._current = _Jump(start_state, None, None)
 
     def copy(self, shallow=False, unfreeze=False):
         """Copies the current state machine.
@@ -394,8 +396,9 @@ class HierarchicalFiniteMachine(FiniteMachine):
         if machine is not None:
             self._states[state]['machine'] = machine
 
-    def initialize(self):
-        super(HierarchicalFiniteMachine, self).initialize()
+    def initialize(self, start_state=None):
+        super(HierarchicalFiniteMachine, self).initialize(
+            start_state=start_state)
         for data in six.itervalues(self._states):
             if 'machine' in data:
                 data['machine'].initialize()

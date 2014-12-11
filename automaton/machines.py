@@ -224,7 +224,12 @@ class FiniteMachine(object):
         if self._states[start_state]['terminal']:
             raise excp.InvalidState("Can not start from a terminal"
                                     " state '%s'" % (start_state))
-        self._current = _Jump(start_state, None, None)
+        # No on enter will be called, since we are priming the state machine
+        # and have not really transitioned from anything to get here, we will
+        # though allow on_exit to be called on the event that causes this
+        # to be moved from...
+        self._current = _Jump(start_state, None,
+                              self._states[start_state]['on_exit'])
 
     def copy(self, shallow=False, unfreeze=False):
         """Copies the current state machine.

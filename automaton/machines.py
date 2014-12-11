@@ -78,10 +78,10 @@ class FiniteMachine(object):
         return cls._Effect(new_state['reactions'].get(event),
                            new_state["terminal"])
 
-    def __init__(self, start_state, add_start=False):
+    def __init__(self, default_start_state=None):
         self._transitions = {}
         self._states = OrderedDict()
-        self._start_state = start_state
+        self._default_start_state = default_start_state
         self._current = None
         self._runner = _FiniteRunner(self)
         self.frozen = False
@@ -91,8 +91,12 @@ class FiniteMachine(object):
         return self._runner
 
     @property
-    def start_state(self):
-        return self._start_state
+    def default_start_state(self):
+        return self._default_start_state
+
+    @default_start_state.setter
+    def default_start_state(self, value):
+        self._default_start_state = value
 
     @property
     def current_state(self):
@@ -217,7 +221,7 @@ class FiniteMachine(object):
     def initialize(self, start_state=None):
         """Sets up the state machine (sets current state to start state...)."""
         if start_state is None:
-            start_state = self._start_state
+            start_state = self._default_start_state
         if start_state not in self._states:
             raise excp.NotFound("Can not start from a undefined"
                                 " state '%s'" % (start_state))
@@ -238,7 +242,7 @@ class FiniteMachine(object):
                         and want to use copies to run with (the copies have
                         the current state that is different between machines).
         """
-        c = type(self)(self.start_state)
+        c = type(self)(default_start_state=self.default_start_state)
         if unfreeze and self.frozen:
             c.frozen = False
         else:
@@ -377,8 +381,9 @@ class HierarchicalFiniteMachine(FiniteMachine):
     _Effect = collections.namedtuple('_Effect',
                                      'reaction,terminal,machine')
 
-    def __init__(self, start_state):
-        super(HierarchicalFiniteMachine, self).__init__(start_state)
+    def __init__(self, default_start_state=None):
+        super(HierarchicalFiniteMachine, self).__init__(
+            default_start_state=default_start_state)
         self._runner = _HierarchicalRunner(self)
 
     @classmethod

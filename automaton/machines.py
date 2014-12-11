@@ -94,9 +94,19 @@ class FiniteMachine(object):
     def default_start_state(self):
         return self._default_start_state
 
-    @default_start_state.setter
-    def default_start_state(self, value):
-        self._default_start_state = value
+    def set_default_start_state(self, state):
+        """Sets the *default* start state that the machine should use.
+
+        NOTE(harlowja): this will be used by ``initialize`` but only if that
+        function is not given its own ``start_state`` that overrides this
+        default.
+        """
+        if self.frozen:
+            raise excp.FrozenMachine()
+        if state not in self._states:
+            raise excp.NotFound("Can not set the default start state to"
+                                " undefined state '%s'" % (state))
+        self._default_start_state = state
 
     @property
     def current_state(self):
@@ -242,7 +252,8 @@ class FiniteMachine(object):
                         and want to use copies to run with (the copies have
                         the current state that is different between machines).
         """
-        c = type(self)(default_start_state=self.default_start_state)
+        c = type(self)()
+        c._default_start_state = self._default_start_state
         if unfreeze and self.frozen:
             c.frozen = False
         else:

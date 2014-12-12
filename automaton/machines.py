@@ -20,6 +20,7 @@ except ImportError:
     from ordereddict import OrderedDict  # noqa
 
 import collections
+import warnings
 import weakref
 
 import prettytable
@@ -78,10 +79,16 @@ class FiniteMachine(object):
         return cls._Effect(new_state['reactions'].get(event),
                            new_state["terminal"])
 
-    def __init__(self):
+    def __init__(self, default_start_state=None):
         self._transitions = {}
         self._states = OrderedDict()
-        self._default_start_state = None
+        if default_start_state is not None:
+            warnings.warn("The usage of 'default_start_state' via the machine"
+                          " constructor is deprecated and will be removed in a"
+                          " future version; usage of the 'default_start_state'"
+                          " property setter is recommended.",
+                          DeprecationWarning, stacklevel=2)
+        self._default_start_state = default_start_state
         self._current = None
         self._runner = _FiniteRunner(self)
         self.frozen = False
@@ -317,7 +324,7 @@ class FiniteMachine(object):
             if self.current_state == state:
                 prefix_markings.append("@")
             postfix_markings = []
-            if self.start_state == state:
+            if self.default_start_state == state:
                 postfix_markings.append("^")
             if self._states[state]['terminal']:
                 postfix_markings.append("$")
@@ -398,8 +405,9 @@ class HierarchicalFiniteMachine(FiniteMachine):
     _Effect = collections.namedtuple('_Effect',
                                      'reaction,terminal,machine')
 
-    def __init__(self):
-        super(HierarchicalFiniteMachine, self).__init__()
+    def __init__(self, default_start_state=None):
+        super(HierarchicalFiniteMachine, self).__init__(
+            default_start_state=default_start_state)
         self._runner = _HierarchicalRunner(self)
 
     @classmethod

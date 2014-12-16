@@ -409,6 +409,7 @@ class HierarchicalFiniteMachine(FiniteMachine):
         super(HierarchicalFiniteMachine, self).__init__(
             default_start_state=default_start_state)
         self._runner = _HierarchicalRunner(self)
+        self._nested_machines = {}
 
     @classmethod
     def _effect_builder(cls, new_state, event):
@@ -424,6 +425,16 @@ class HierarchicalFiniteMachine(FiniteMachine):
             state, terminal=terminal, on_enter=on_enter, on_exit=on_exit)
         if machine is not None:
             self._states[state]['machine'] = machine
+            self._nested_machines[state] = machine
+
+    def copy(self, shallow=False, unfreeze=False):
+        c = super(HierarchicalFiniteMachine, self).copy(shallow=shallow,
+                                                        unfreeze=unfreeze)
+        if shallow:
+            c._nested_machines = self._nested_machines
+        else:
+            c._nested_machines = self._nested_machines.copy()
+        return c
 
     def initialize(self, start_state=None):
         super(HierarchicalFiniteMachine, self).initialize(
@@ -431,6 +442,10 @@ class HierarchicalFiniteMachine(FiniteMachine):
         for data in six.itervalues(self._states):
             if 'machine' in data:
                 data['machine'].initialize()
+
+    @property
+    def nested_machines(self):
+        return self._nested_machines
 
 
 class _HierarchicalRunner(object):

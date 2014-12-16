@@ -310,6 +310,10 @@ class HFSMTest(FSMTest):
         dialer.add_transition("talk", "hangup", 'hangup')
         return dialer, number_calling
 
+    def test_nested_machines(self):
+        dialer, _number_calling = self._make_phone_dialer()
+        self.assertEqual(1, len(dialer.nested_machines))
+
     def test_phone_dialer_iter(self):
         dialer, number_calling = self._make_phone_dialer()
         self.assertEqual(0, len(number_calling))

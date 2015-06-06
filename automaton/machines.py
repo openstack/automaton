@@ -20,9 +20,9 @@ except ImportError:
     from ordereddict import OrderedDict  # noqa
 
 import collections
-import warnings
 import weakref
 
+from debtcollector import removals
 import prettytable
 import six
 
@@ -79,15 +79,15 @@ class FiniteMachine(object):
         return cls._Effect(new_state['reactions'].get(event),
                            new_state["terminal"])
 
+    @removals.removed_kwarg('default_start_state',
+                            message="The usage of 'default_start_state' via"
+                            " the machine constructor is deprecated and will"
+                            " be removed in a future version; usage of"
+                            " the 'default_start_state' property setter is"
+                            " recommended.")
     def __init__(self, default_start_state=None):
         self._transitions = {}
         self._states = OrderedDict()
-        if default_start_state is not None:
-            warnings.warn("The usage of 'default_start_state' via the machine"
-                          " constructor is deprecated and will be removed in a"
-                          " future version; usage of the 'default_start_state'"
-                          " property setter is recommended.",
-                          DeprecationWarning, stacklevel=2)
         self._default_start_state = default_start_state
         self._current = None
         self._runner = _FiniteRunner(self)

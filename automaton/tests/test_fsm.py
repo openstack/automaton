@@ -19,6 +19,7 @@ import random
 
 from automaton import exceptions as excp
 from automaton import machines
+from automaton import runners
 
 import six
 from testtools import testcase
@@ -50,7 +51,8 @@ class FSMTest(testcase.TestCase):
 
     def test_bad_start_state(self):
         m = self._create_fsm('unknown', add_start=False)
-        self.assertRaises(excp.NotFound, m.runner.run, 'unknown')
+        r = runners.FiniteRunner(m)
+        self.assertRaises(excp.NotFound, r.run, 'unknown')
 
     def test_contains(self):
         m = self._create_fsm('unknown', add_start=False)
@@ -92,11 +94,11 @@ class FSMTest(testcase.TestCase):
         m.initialize()
         self.assertEqual('down', m.current_state)
         self.assertFalse(m.terminated)
-        m_runner = m.runner
-        m_runner.run('jump')
+        r = runners.FiniteRunner(m)
+        r.run('jump')
         self.assertTrue(m.terminated)
         self.assertEqual('broken', m.current_state)
-        self.assertRaises(excp.InvalidState, m_runner.run,
+        self.assertRaises(excp.InvalidState, r.run,
                           'jump', initialize=False)
 
     def test_on_enter_on_exit(self):
@@ -128,7 +130,7 @@ class FSMTest(testcase.TestCase):
 
     def test_run_iter(self):
         up_downs = []
-        runner = self.jumper.runner
+        runner = runners.FiniteRunner(self.jumper)
         for (old_state, new_state) in runner.run_iter('jump'):
             up_downs.append((old_state, new_state))
             if len(up_downs) >= 3:
@@ -142,7 +144,7 @@ class FSMTest(testcase.TestCase):
 
     def test_run_send(self):
         up_downs = []
-        runner = self.jumper.runner
+        runner = runners.FiniteRunner(self.jumper)
         it = runner.run_iter('jump')
         while True:
             up_downs.append(it.send(None))
@@ -157,7 +159,7 @@ class FSMTest(testcase.TestCase):
 
     def test_run_send_fail(self):
         up_downs = []
-        runner = self.jumper.runner
+        runner = runners.FiniteRunner(self.jumper)
         it = runner.run_iter('jump')
         up_downs.append(six.next(it))
         self.assertRaises(excp.NotFound, it.send, 'fail')
@@ -196,8 +198,9 @@ class FSMTest(testcase.TestCase):
     def test_copy_initialized(self):
         j = self.jumper.copy()
         self.assertIsNone(j.current_state)
+        r = runners.FiniteRunner(self.jumper)
 
-        for i, transition in enumerate(self.jumper.runner.run_iter('jump')):
+        for i, transition in enumerate(r.run_iter('jump')):
             if i == 4:
                 break
 
@@ -317,7 +320,8 @@ class HFSMTest(FSMTest):
     def test_phone_dialer_iter(self):
         dialer, number_calling = self._make_phone_dialer()
         self.assertEqual(0, len(number_calling))
-        transitions = list(dialer.runner.run_iter('dial'))
+        r = runners.HierarchicalRunner(dialer)
+        transitions = list(r.run_iter('dial'))
         self.assertEqual(('talk', 'hangup'), transitions[-1])
         self.assertEqual(len(number_calling),
                          sum(1 if new_state == 'accumulate' else 0
@@ -326,12 +330,14 @@ class HFSMTest(FSMTest):
 
     def test_phone_call(self):
         handler = self._make_phone_call()
-        handler.runner.run('call')
+        r = runners.HierarchicalRunner(handler)
+        r.run('call')
         self.assertTrue(handler.terminated)
 
     def test_phone_call_iter(self):
         handler = self._make_phone_call()
-        transitions = list(handler.runner.run_iter('call'))
+        r = runners.HierarchicalRunner(handler)
+        transitions = list(r.run_iter('call'))
         self.assertEqual(('talk', 'hangup'), transitions[-1])
         self.assertEqual(("begin", 'phone'), transitions[0])
         talk_talk = 0

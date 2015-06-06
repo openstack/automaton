@@ -20,18 +20,12 @@ except ImportError:
     from ordereddict import OrderedDict  # noqa
 
 import collections
-import weakref
 
 from debtcollector import removals
 import prettytable
 import six
 
 from automaton import exceptions as excp
-
-_JUMPER_NOT_FOUND_TPL = ("Unable to progress since no reaction (or"
-                         " sent event) has been made available in"
-                         " new state '%s' (moved to from state '%s'"
-                         " in response to event '%s')")
 
 
 def _orderedkeys(data, sort=True):
@@ -90,12 +84,7 @@ class FiniteMachine(object):
         self._states = OrderedDict()
         self._default_start_state = default_start_state
         self._current = None
-        self._runner = _FiniteRunner(self)
         self.frozen = False
-
-    @property
-    def runner(self):
-        return self._runner
 
     @property
     def default_start_state(self):
@@ -356,48 +345,6 @@ class FiniteMachine(object):
         return tbl.get_string()
 
 
-class _FiniteRunner(object):
-    """Finite machine runner used to run a finite machine."""
-
-    def __init__(self, machine):
-        self._machine = weakref.proxy(machine)
-
-    def run(self, event, initialize=True):
-        """Runs the state machine, using reactions only."""
-        for transition in self.run_iter(event, initialize=initialize):
-            pass
-
-    def run_iter(self, event, initialize=True):
-        """Returns a iterator/generator that will run the state machine.
-
-        NOTE(harlowja): only one runner iterator/generator should be active for
-        a machine, if this is not observed then it is possible for
-        initialization and other local state to be corrupted and cause issues
-        when running...
-        """
-        if initialize:
-            self._machine.initialize()
-        while True:
-            old_state = self._machine.current_state
-            reaction, terminal = self._machine.process_event(event)
-            new_state = self._machine.current_state
-            try:
-                sent_event = yield (old_state, new_state)
-            except GeneratorExit:
-                break
-            if terminal:
-                break
-            if reaction is None and sent_event is None:
-                raise excp.NotFound(_JUMPER_NOT_FOUND_TPL % (new_state,
-                                                             old_state,
-                                                             event))
-            elif sent_event is not None:
-                event = sent_event
-            else:
-                cb, args, kwargs = reaction
-                event = cb(old_state, new_state, event, *args, **kwargs)
-
-
 class HierarchicalFiniteMachine(FiniteMachine):
     """A fsm that understands how to run in a hierarchical mode."""
 
@@ -408,7 +355,6 @@ class HierarchicalFiniteMachine(FiniteMachine):
     def __init__(self, default_start_state=None):
         super(HierarchicalFiniteMachine, self).__init__(
             default_start_state=default_start_state)
-        self._runner = _HierarchicalRunner(self)
         self._nested_machines = {}
 
     @classmethod
@@ -446,89 +392,3 @@ class HierarchicalFiniteMachine(FiniteMachine):
     @property
     def nested_machines(self):
         return self._nested_machines
-
-
-class _HierarchicalRunner(object):
-    """Hierarchical machine runner used to run a hierarchical machine."""
-
-    def __init__(self, machine):
-        self._machine = weakref.proxy(machine)
-
-    def run(self, event, initialize=True):
-        """Runs the state machine, using reactions only."""
-        for transition in self.run_iter(event, initialize=initialize):
-            pass
-
-    @staticmethod
-    def _process_event(machines, event):
-        """Matches a event to the machine hierarchy.
-
-        If the lowest level machine does not handle the event, then the
-        parent machine is referred to and so on, until there is only one
-        machine left which *must* handle the event.
-
-        The machine whose ``process_event`` does not throw invalid state or
-        not found exceptions is expected to be the machine that should
-        continue handling events...
-        """
-        while True:
-            machine = machines[-1]
-            try:
-                result = machine.process_event(event)
-            except (excp.InvalidState, excp.NotFound):
-                if len(machines) == 1:
-                    raise
-                else:
-                    current = machine._current
-                    if current is not None and current.on_exit is not None:
-                        current.on_exit(current.name, event)
-                    machine._current = None
-                    machines.pop()
-            else:
-                return result
-
-    def run_iter(self, event, initialize=True):
-        """Returns a iterator/generator that will run the state machine.
-
-        This will keep a stack (hierarchy) of machines active and jumps through
-        them as needed (depending on which machine handles which event) during
-        the running lifecycle.
-
-        NOTE(harlowja): only one runner iterator/generator should be active for
-        a machine hierarchy, if this is not observed then it is possible for
-        initialization and other local state to be corrupted and causes issues
-        when running...
-        """
-        machines = [self._machine]
-        if initialize:
-            machines[-1].initialize()
-        while True:
-            old_state = machines[-1].current_state
-            effect = self._process_event(machines, event)
-            new_state = machines[-1].current_state
-            try:
-                machine = effect.machine
-            except AttributeError:
-                pass
-            else:
-                if machine is not None and machine is not machines[-1]:
-                    machine.initialize()
-                    machines.append(machine)
-            try:
-                sent_event = yield (old_state, new_state)
-            except GeneratorExit:
-                break
-            if len(machines) == 1 and effect.terminal:
-                # Only allow the top level machine to actually terminate the
-                # execution, the rest of the nested machines must not handle
-                # events if they wish to have the root machine terminate...
-                break
-            if effect.reaction is None and sent_event is None:
-                raise excp.NotFound(_JUMPER_NOT_FOUND_TPL % (new_state,
-                                                             old_state,
-                                                             event))
-            elif sent_event is not None:
-                event = sent_event
-            else:
-                cb, args, kwargs = effect.reaction
-                event = cb(old_state, new_state, event, *args, **kwargs)

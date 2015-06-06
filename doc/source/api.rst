@@ -16,10 +16,10 @@ Machines
 Runners
 -------
 
-.. autoclass:: automaton.machines._FiniteRunner
+.. autoclass:: automaton.runners.FiniteRunner
     :members:
 
-.. autoclass:: automaton.machines._HierarchicalRunner
+.. autoclass:: automaton.runners.HierarchicalRunner
     :members:
 
 ----------

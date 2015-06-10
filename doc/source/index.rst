@@ -9,6 +9,7 @@ Friendly state machines for python.
    features
    api
    installation
+   examples
    contributing
 
 Indices and tables

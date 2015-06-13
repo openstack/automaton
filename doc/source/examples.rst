@@ -65,9 +65,9 @@ Transitioning a simple machine
     False
 
 
--------------------------
-Running a complex machine
--------------------------
+-------------------------------------
+Running a complex dog-barking machine
+-------------------------------------
 
 .. testcode::
 
@@ -129,3 +129,228 @@ Running a complex machine
     Entered 'wags tail'
     Leaving 'wags tail'
     Entered 'lies down'
+
+------------------------------------
+Creating a complex CD-player machine
+------------------------------------
+
+.. testcode::
+
+    from automaton import machines
+
+
+    def print_on_enter(new_state, triggered_event):
+       print("Entered '%s' due to '%s'" % (new_state, triggered_event))
+
+
+    def print_on_exit(old_state, triggered_event):
+       print("Exiting '%s' due to '%s'" % (old_state, triggered_event))
+
+
+    m = machines.FiniteMachine()
+
+    m.add_state('stopped', on_enter=print_on_enter, on_exit=print_on_exit)
+    m.add_state('opened',  on_enter=print_on_enter, on_exit=print_on_exit)
+    m.add_state('closed',  on_enter=print_on_enter, on_exit=print_on_exit)
+    m.add_state('playing',  on_enter=print_on_enter, on_exit=print_on_exit)
+    m.add_state('paused',  on_enter=print_on_enter, on_exit=print_on_exit)
+
+    m.add_transition('stopped', 'playing', 'play')
+    m.add_transition('stopped', 'opened', 'open_close')
+    m.add_transition('stopped', 'stopped', 'stop')
+
+    m.add_transition('opened', 'closed', 'open_close')
+
+    m.add_transition('closed', 'opened', 'open_close')
+    m.add_transition('closed', 'stopped', 'cd_detected')
+
+    m.add_transition('playing', 'stopped', 'stop')
+    m.add_transition('playing', 'paused', 'pause')
+    m.add_transition('playing', 'opened', 'open_close')
+
+    m.add_transition('paused', 'playing', 'play')
+    m.add_transition('paused', 'stopped', 'stop')
+    m.add_transition('paused', 'opened', 'open_close')
+
+    m.default_start_state = 'closed'
+
+    m.initialize()
+    print(m.pformat())
+
+    for event in ['cd_detected', 'play', 'pause', 'play', 'stop',
+                  'open_close', 'open_close']:
+        m.process_event(event)
+        print(m.pformat())
+        print("=============")
+        print("Current state => %s" % m.current_state)
+        print("=============")
+
+
+
+**Expected output:**
+
+.. testoutput::
+
+    +------------+-------------+---------+----------------+---------------+
+    |   Start    |    Event    |   End   |    On Enter    |    On Exit    |
+    +------------+-------------+---------+----------------+---------------+
+    | @closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | @closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |   opened   |  open_close |  closed | print_on_enter | print_on_exit |
+    |   paused   |  open_close |  opened | print_on_enter | print_on_exit |
+    |   paused   |     play    | playing | print_on_enter | print_on_exit |
+    |   paused   |     stop    | stopped | print_on_enter | print_on_exit |
+    |  playing   |  open_close |  opened | print_on_enter | print_on_exit |
+    |  playing   |    pause    |  paused | print_on_enter | print_on_exit |
+    |  playing   |     stop    | stopped | print_on_enter | print_on_exit |
+    |  stopped   |  open_close |  opened | print_on_enter | print_on_exit |
+    |  stopped   |     play    | playing | print_on_enter | print_on_exit |
+    |  stopped   |     stop    | stopped | print_on_enter | print_on_exit |
+    +------------+-------------+---------+----------------+---------------+
+    Exiting 'closed' due to 'cd_detected'
+    Entered 'stopped' due to 'cd_detected'
+    +-----------+-------------+---------+----------------+---------------+
+    |   Start   |    Event    |   End   |    On Enter    |    On Exit    |
+    +-----------+-------------+---------+----------------+---------------+
+    | closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |   opened  |  open_close |  closed | print_on_enter | print_on_exit |
+    |   paused  |  open_close |  opened | print_on_enter | print_on_exit |
+    |   paused  |     play    | playing | print_on_enter | print_on_exit |
+    |   paused  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  playing  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  playing  |    pause    |  paused | print_on_enter | print_on_exit |
+    |  playing  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  @stopped |  open_close |  opened | print_on_enter | print_on_exit |
+    |  @stopped |     play    | playing | print_on_enter | print_on_exit |
+    |  @stopped |     stop    | stopped | print_on_enter | print_on_exit |
+    +-----------+-------------+---------+----------------+---------------+
+    =============
+    Current state => stopped
+    =============
+    Exiting 'stopped' due to 'play'
+    Entered 'playing' due to 'play'
+    +-----------+-------------+---------+----------------+---------------+
+    |   Start   |    Event    |   End   |    On Enter    |    On Exit    |
+    +-----------+-------------+---------+----------------+---------------+
+    | closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |   opened  |  open_close |  closed | print_on_enter | print_on_exit |
+    |   paused  |  open_close |  opened | print_on_enter | print_on_exit |
+    |   paused  |     play    | playing | print_on_enter | print_on_exit |
+    |   paused  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  @playing |  open_close |  opened | print_on_enter | print_on_exit |
+    |  @playing |    pause    |  paused | print_on_enter | print_on_exit |
+    |  @playing |     stop    | stopped | print_on_enter | print_on_exit |
+    |  stopped  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  stopped  |     play    | playing | print_on_enter | print_on_exit |
+    |  stopped  |     stop    | stopped | print_on_enter | print_on_exit |
+    +-----------+-------------+---------+----------------+---------------+
+    =============
+    Current state => playing
+    =============
+    Exiting 'playing' due to 'pause'
+    Entered 'paused' due to 'pause'
+    +-----------+-------------+---------+----------------+---------------+
+    |   Start   |    Event    |   End   |    On Enter    |    On Exit    |
+    +-----------+-------------+---------+----------------+---------------+
+    | closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |   opened  |  open_close |  closed | print_on_enter | print_on_exit |
+    |  @paused  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  @paused  |     play    | playing | print_on_enter | print_on_exit |
+    |  @paused  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  playing  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  playing  |    pause    |  paused | print_on_enter | print_on_exit |
+    |  playing  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  stopped  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  stopped  |     play    | playing | print_on_enter | print_on_exit |
+    |  stopped  |     stop    | stopped | print_on_enter | print_on_exit |
+    +-----------+-------------+---------+----------------+---------------+
+    =============
+    Current state => paused
+    =============
+    Exiting 'paused' due to 'play'
+    Entered 'playing' due to 'play'
+    +-----------+-------------+---------+----------------+---------------+
+    |   Start   |    Event    |   End   |    On Enter    |    On Exit    |
+    +-----------+-------------+---------+----------------+---------------+
+    | closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |   opened  |  open_close |  closed | print_on_enter | print_on_exit |
+    |   paused  |  open_close |  opened | print_on_enter | print_on_exit |
+    |   paused  |     play    | playing | print_on_enter | print_on_exit |
+    |   paused  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  @playing |  open_close |  opened | print_on_enter | print_on_exit |
+    |  @playing |    pause    |  paused | print_on_enter | print_on_exit |
+    |  @playing |     stop    | stopped | print_on_enter | print_on_exit |
+    |  stopped  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  stopped  |     play    | playing | print_on_enter | print_on_exit |
+    |  stopped  |     stop    | stopped | print_on_enter | print_on_exit |
+    +-----------+-------------+---------+----------------+---------------+
+    =============
+    Current state => playing
+    =============
+    Exiting 'playing' due to 'stop'
+    Entered 'stopped' due to 'stop'
+    +-----------+-------------+---------+----------------+---------------+
+    |   Start   |    Event    |   End   |    On Enter    |    On Exit    |
+    +-----------+-------------+---------+----------------+---------------+
+    | closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |   opened  |  open_close |  closed | print_on_enter | print_on_exit |
+    |   paused  |  open_close |  opened | print_on_enter | print_on_exit |
+    |   paused  |     play    | playing | print_on_enter | print_on_exit |
+    |   paused  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  playing  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  playing  |    pause    |  paused | print_on_enter | print_on_exit |
+    |  playing  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  @stopped |  open_close |  opened | print_on_enter | print_on_exit |
+    |  @stopped |     play    | playing | print_on_enter | print_on_exit |
+    |  @stopped |     stop    | stopped | print_on_enter | print_on_exit |
+    +-----------+-------------+---------+----------------+---------------+
+    =============
+    Current state => stopped
+    =============
+    Exiting 'stopped' due to 'open_close'
+    Entered 'opened' due to 'open_close'
+    +-----------+-------------+---------+----------------+---------------+
+    |   Start   |    Event    |   End   |    On Enter    |    On Exit    |
+    +-----------+-------------+---------+----------------+---------------+
+    | closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |  @opened  |  open_close |  closed | print_on_enter | print_on_exit |
+    |   paused  |  open_close |  opened | print_on_enter | print_on_exit |
+    |   paused  |     play    | playing | print_on_enter | print_on_exit |
+    |   paused  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  playing  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  playing  |    pause    |  paused | print_on_enter | print_on_exit |
+    |  playing  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  stopped  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  stopped  |     play    | playing | print_on_enter | print_on_exit |
+    |  stopped  |     stop    | stopped | print_on_enter | print_on_exit |
+    +-----------+-------------+---------+----------------+---------------+
+    =============
+    Current state => opened
+    =============
+    Exiting 'opened' due to 'open_close'
+    Entered 'closed' due to 'open_close'
+    +------------+-------------+---------+----------------+---------------+
+    |   Start    |    Event    |   End   |    On Enter    |    On Exit    |
+    +------------+-------------+---------+----------------+---------------+
+    | @closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | @closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |   opened   |  open_close |  closed | print_on_enter | print_on_exit |
+    |   paused   |  open_close |  opened | print_on_enter | print_on_exit |
+    |   paused   |     play    | playing | print_on_enter | print_on_exit |
+    |   paused   |     stop    | stopped | print_on_enter | print_on_exit |
+    |  playing   |  open_close |  opened | print_on_enter | print_on_exit |
+    |  playing   |    pause    |  paused | print_on_enter | print_on_exit |
+    |  playing   |     stop    | stopped | print_on_enter | print_on_exit |
+    |  stopped   |  open_close |  opened | print_on_enter | print_on_exit |
+    |  stopped   |     play    | playing | print_on_enter | print_on_exit |
+    |  stopped   |     stop    | stopped | print_on_enter | print_on_exit |
+    +------------+-------------+---------+----------------+---------------+
+    =============
+    Current state => closed
+    =============

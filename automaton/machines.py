@@ -341,7 +341,23 @@ class FiniteMachine(object):
                         row.append(empty)
                     tbl.add_row(row)
             else:
-                tbl.add_row([pretty_state, empty, empty, empty, empty])
+                on_enter = self._states[state]['on_enter']
+                if on_enter is not None:
+                    try:
+                        on_enter = on_enter.__name__
+                    except AttributeError:
+                        pass
+                else:
+                    on_enter = empty
+                on_exit = self._states[state]['on_exit']
+                if on_exit is not None:
+                    try:
+                        on_exit = on_exit.__name__
+                    except AttributeError:
+                        pass
+                else:
+                    on_exit = empty
+                tbl.add_row([pretty_state, empty, empty, on_enter, on_exit])
         return tbl.get_string()
 
 

@@ -15,23 +15,27 @@
 #    under the License.
 
 
-class InvalidState(Exception):
+class AutomatonException(Exception):
+    """Base class for *most* exceptions emitted from this library."""
+
+
+class InvalidState(AutomatonException):
     """Raised when a invalid state transition is attempted while executing."""
 
 
-class NotInitialized(Exception):
+class NotInitialized(AutomatonException):
     """Error raised when an action is attempted on a not inited machine."""
 
 
-class NotFound(Exception):
+class NotFound(AutomatonException):
     """Raised when some entry in some object doesn't exist."""
 
 
-class Duplicate(Exception):
+class Duplicate(AutomatonException):
     """Raised when a duplicate entry is found."""
 
 
-class FrozenMachine(Exception):
+class FrozenMachine(AutomatonException):
     """Exception raised when a frozen machine is modified."""
 
     def __init__(self):

@@ -28,3 +28,10 @@ Exceptions
 
 .. automodule:: automaton.exceptions
     :members:
+
+Hierarchy
+---------
+
+.. inheritance-diagram::
+    automaton.exceptions
+    :parts: 1

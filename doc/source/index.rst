@@ -12,6 +12,14 @@ Friendly state machines for python.
    examples
    contributing
 
+History
+=======
+
+.. toctree::
+   :maxdepth: 2
+
+   history
+
 Indices and tables
 ==================
 

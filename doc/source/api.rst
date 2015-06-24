@@ -23,6 +23,13 @@ Runners
     :members:
 
 ----------
+Converters
+----------
+
+.. automodule:: automaton.converters.pydot
+    :members:
+
+----------
 Exceptions
 ----------
 

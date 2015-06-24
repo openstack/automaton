@@ -60,6 +60,12 @@ class FSMTest(testcase.TestCase):
         m.add_state('unknown')
         self.assertIn('unknown', m)
 
+    def test_no_add_transition_terminal(self):
+        m = self._create_fsm('up')
+        m.add_state('down', terminal=True)
+        self.assertRaises(excp.InvalidState,
+                          m.add_transition, 'down', 'up', 'jump')
+
     def test_duplicate_state(self):
         m = self._create_fsm('unknown')
         self.assertRaises(excp.Duplicate, m.add_state, 'unknown')

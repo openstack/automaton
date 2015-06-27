@@ -14,6 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
+
+import six
+
 from automaton import exceptions as excp
 from automaton import machines
 
@@ -24,7 +28,33 @@ _JUMPER_NOT_FOUND_TPL = ("Unable to progress since no reaction (or"
                          " in response to event '%s')")
 
 
-class FiniteRunner(object):
+@six.add_metaclass(abc.ABCMeta)
+class Runner(object):
+    """Machine runner used to run a state machine.
+
+    Only **one** runner per machine should be active at the same time (aka
+    there should not be multiple runners using the same machine instance at
+    the same time).
+    """
+    def __init__(self, machine):
+        self._machine = machine
+
+    @abc.abstractmethod
+    def run(self, event, initialize=True):
+        """Runs the state machine, using reactions only."""
+
+    @abc.abstractmethod
+    def run_iter(self, event, initialize=True):
+        """Returns a iterator/generator that will run the state machine.
+
+        NOTE(harlowja): only one runner iterator/generator should be active for
+        a machine, if this is not observed then it is possible for
+        initialization and other local state to be corrupted and cause issues
+        when running...
+        """
+
+
+class FiniteRunner(Runner):
     """Finite machine runner used to run a finite machine.
 
     Only **one** runner per machine should be active at the same time (aka
@@ -36,21 +66,13 @@ class FiniteRunner(object):
         """Create a runner for the given machine."""
         if not isinstance(machine, (machines.FiniteMachine,)):
             raise TypeError("FiniteRunner only works with FiniteMachine(s)")
-        self._machine = machine
+        super(FiniteRunner, self).__init__(machine)
 
     def run(self, event, initialize=True):
-        """Runs the state machine, using reactions only."""
         for transition in self.run_iter(event, initialize=initialize):
             pass
 
     def run_iter(self, event, initialize=True):
-        """Returns a iterator/generator that will run the state machine.
-
-        NOTE(harlowja): only one runner iterator/generator should be active for
-        a machine, if this is not observed then it is possible for
-        initialization and other local state to be corrupted and cause issues
-        when running...
-        """
         if initialize:
             self._machine.initialize()
         while True:
@@ -74,7 +96,7 @@ class FiniteRunner(object):
                 event = cb(old_state, new_state, event, *args, **kwargs)
 
 
-class HierarchicalRunner(object):
+class HierarchicalRunner(Runner):
     """Hierarchical machine runner used to run a hierarchical machine.
 
     Only **one** runner per machine should be active at the same time (aka
@@ -87,10 +109,9 @@ class HierarchicalRunner(object):
         if not isinstance(machine, (machines.HierarchicalFiniteMachine,)):
             raise TypeError("HierarchicalRunner only works with"
                             " HierarchicalFiniteMachine(s)")
-        self._machine = machine
+        super(HierarchicalRunner, self).__init__(machine)
 
     def run(self, event, initialize=True):
-        """Runs the state machine, using reactions only."""
         for transition in self.run_iter(event, initialize=initialize):
             pass
 

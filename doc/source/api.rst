@@ -16,6 +16,9 @@ Machines
 Runners
 -------
 
+.. autoclass:: automaton.runners.Runner
+    :members:
+
 .. autoclass:: automaton.runners.FiniteRunner
     :members:
 

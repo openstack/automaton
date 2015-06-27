@@ -14,11 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-try:
-    from collections import OrderedDict  # noqa
-except ImportError:
-    from ordereddict import OrderedDict  # noqa
-
 import collections
 
 from debtcollector import removals
@@ -81,7 +76,7 @@ class FiniteMachine(object):
                             " recommended.")
     def __init__(self, default_start_state=None):
         self._transitions = {}
-        self._states = OrderedDict()
+        self._states = collections.OrderedDict()
         self._default_start_state = default_start_state
         self._current = None
         self.frozen = False
@@ -143,7 +138,7 @@ class FiniteMachine(object):
             'on_enter': on_enter,
             'on_exit': on_exit,
         }
-        self._transitions[state] = OrderedDict()
+        self._transitions[state] = collections.OrderedDict()
 
     def add_reaction(self, state, event, reaction, *args, **kwargs):
         """Adds a reaction that may get triggered by the given event & state.

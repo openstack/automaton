@@ -49,15 +49,18 @@ class FiniteMachine(object):
     entering a new state.
 
     NOTE(harlowja): reactions will *only* be called when the generator/iterator
-    from ``runner.run_iter()`` does *not* send back a new event (they will
-    always be called if the ``runner.run()`` method is used). This allows for
-    two unique ways (these ways can also be intermixed) to use this state
-    machine when using ``runner.run_iter()``; one where *external* events
-    trigger the next state transition and one where *internal* reaction
-    callbacks trigger the next state transition. The other way to use this
-    state machine is to skip using ``runner.run()`` or ``runner.run_iter()``
-    completely and use the ``process_event()`` method explicitly and trigger
-    the events via some *external* functionality/triggers...
+    from :py:meth:`~automaton.runners.Runner.run_iter` does *not* send
+    back a new event (they will always be called if the
+    :py:meth:`~automaton.runners.Runner.run` method is used). This allows
+    for two unique ways (these ways can also be intermixed) to use this state
+    machine when using :py:meth:`~automaton.runners.Runner.run`; one
+    where *external* event trigger the next state transition and one
+    where *internal* reaction callbacks trigger the next state
+    transition. The other way to use this
+    state machine is to skip using  :py:meth:`~automaton.runners.Runner.run`
+    or :py:meth:`~automaton.runners.Runner.run_iter`
+    completely and use the :meth:`.process_event` method explicitly and
+    trigger the events via some *external* functionality/triggers...
     """
 
     # Result of processing an event (cause and effect...)

@@ -59,17 +59,18 @@ class FiniteMachine(object):
     transition. The other way to use this
     state machine is to skip using  :py:meth:`~automaton.runners.Runner.run`
     or :py:meth:`~automaton.runners.Runner.run_iter`
-    completely and use the :meth:`.process_event` method explicitly and
-    trigger the events via some *external* functionality/triggers...
+    completely and use the :meth:`~.FiniteMachine.process_event` method
+    explicitly and trigger the events via
+    some *external* functionality/triggers...
     """
 
-    # Result of processing an event (cause and effect...)
-    _Effect = collections.namedtuple('_Effect', 'reaction,terminal')
+    #: The result of processing an event (cause and effect...)
+    Effect = collections.namedtuple('Effect', 'reaction,terminal')
 
     @classmethod
     def _effect_builder(cls, new_state, event):
-        return cls._Effect(new_state['reactions'].get(event),
-                           new_state["terminal"])
+        return cls.Effect(new_state['reactions'].get(event),
+                          new_state["terminal"])
 
     @removals.removed_kwarg('default_start_state',
                             message="The usage of 'default_start_state' via"
@@ -215,7 +216,17 @@ class FiniteMachine(object):
         return result
 
     def process_event(self, event):
-        """Trigger a state change in response to the provided event."""
+        """Trigger a state change in response to the provided event.
+
+        :returns: Effect this is either a :py:class:`.FiniteMachine.Effect` or
+                  an ``Effect`` from a subclass of :py:class:`.FiniteMachine`.
+                  See the appropriate named tuple for a description of the
+                  actual items in the tuple. For
+                  example, :py:class:`.FiniteMachine.Effect`'s
+                  first item is ``reaction``: one could invoke this reaction's
+                  callback to react to the new stable state.
+        :rtype: namedtuple
+        """
         self._pre_process_event(event)
         current = self._current
         replacement = self._transitions[current.name][event]
@@ -350,9 +361,9 @@ class FiniteMachine(object):
 class HierarchicalFiniteMachine(FiniteMachine):
     """A fsm that understands how to run in a hierarchical mode."""
 
-    # Result of processing an event (cause and effect...)
-    _Effect = collections.namedtuple('_Effect',
-                                     'reaction,terminal,machine')
+    #: The result of processing an event (cause and effect...)
+    Effect = collections.namedtuple('Effect',
+                                    'reaction,terminal,machine')
 
     def __init__(self, default_start_state=None):
         super(HierarchicalFiniteMachine, self).__init__(
@@ -361,8 +372,8 @@ class HierarchicalFiniteMachine(FiniteMachine):
 
     @classmethod
     def _effect_builder(cls, new_state, event):
-        return cls._Effect(new_state['reactions'].get(event),
-                           new_state["terminal"], new_state.get('machine'))
+        return cls.Effect(new_state['reactions'].get(event),
+                          new_state["terminal"], new_state.get('machine'))
 
     def add_state(self, state,
                   terminal=False, on_enter=None, on_exit=None, machine=None):

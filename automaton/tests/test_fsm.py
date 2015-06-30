@@ -323,6 +323,17 @@ class HFSMTest(FSMTest):
         dialer, _number_calling = self._make_phone_dialer()
         self.assertEqual(1, len(dialer.nested_machines))
 
+    def test_nested_machine_initializers(self):
+        dialer, _number_calling = self._make_phone_dialer()
+        queried_for = []
+
+        def init_with(nested_machine):
+            queried_for.append(nested_machine)
+            return None
+
+        dialer.initialize(nested_start_state_fetcher=init_with)
+        self.assertEqual(1, len(queried_for))
+
     def test_phone_dialer_iter(self):
         dialer, number_calling = self._make_phone_dialer()
         self.assertEqual(0, len(number_calling))

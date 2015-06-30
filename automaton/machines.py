@@ -105,6 +105,7 @@ class FiniteMachine(object):
 
     @property
     def current_state(self):
+        """The current state the machine is in (or none if not initialized)."""
         if self._current is not None:
             return self._current.name
         return None
@@ -119,11 +120,11 @@ class FiniteMachine(object):
     def add_state(self, state, terminal=False, on_enter=None, on_exit=None):
         """Adds a given state to the state machine.
 
-        The on_enter and on_exit callbacks, if provided will be expected to
-        take two positional parameters, these being the state being exited (for
-        on_exit) or the state being entered (for on_enter) and a second
-        parameter which is the event that is being processed that caused the
-        state transition.
+        The ``on_enter`` and ``on_exit`` callbacks, if provided will be
+        expected to take two positional parameters, these being the state
+        being exited (for ``on_exit``) or the state being entered (for
+        ``on_enter``) and a second parameter which is the event that is
+        being processed that caused the state transition.
         """
         if self.frozen:
             raise excp.FrozenMachine()
@@ -228,7 +229,13 @@ class FiniteMachine(object):
         return self._post_process_event(event, result)
 
     def initialize(self, start_state=None):
-        """Sets up the state machine (sets current state to start state...)."""
+        """Sets up the state machine (sets current state to start state...).
+
+        :param start_state: explicit start state to use to initialize the
+                            state machine to. If ``None`` is provided then
+                            the machine's default start state will be used
+                            instead.
+        """
         if start_state is None:
             start_state = self._default_start_state
         if start_state not in self._states:
@@ -366,6 +373,15 @@ class HierarchicalFiniteMachine(FiniteMachine):
 
     def add_state(self, state,
                   terminal=False, on_enter=None, on_exit=None, machine=None):
+        """Adds a given state to the state machine.
+
+        :param machine: the nested state machine that will be transitioned
+                        into when this state is entered
+        :type machine: :py:class:`.FiniteMachine`
+
+        Further arguments are interpreted as
+        for :py:meth:`.FiniteMachine.add_state`.
+        """
         if machine is not None and not isinstance(machine, FiniteMachine):
             raise ValueError(
                 "Nested state machines must themselves be state machines")
@@ -384,13 +400,45 @@ class HierarchicalFiniteMachine(FiniteMachine):
             c._nested_machines = self._nested_machines.copy()
         return c
 
-    def initialize(self, start_state=None):
+    def initialize(self, start_state=None,
+                   nested_start_state_fetcher=None):
+        """Sets up the state machine (sets current state to start state...).
+
+        :param start_state: explicit start state to use to initialize the
+                            state machine to. If ``None`` is provided then the
+                            machine's default start state will be used
+                            instead.
+        :param nested_start_state_fetcher: A callback that can return start
+                                           states for any nested machines
+                                           **only**. If not ``None`` then it
+                                           will be provided a single argument,
+                                           the machine to provide a starting
+                                           state for and it is expected to
+                                           return a starting state (or
+                                           ``None``) for each machine called
+                                           with. Do note that this callback
+                                           will also be passed to other nested
+                                           state machines as well, so it will
+                                           also be used to initialize any state
+                                           machines they contain (recursively).
+        """
         super(HierarchicalFiniteMachine, self).initialize(
             start_state=start_state)
         for data in six.itervalues(self._states):
             if 'machine' in data:
-                data['machine'].initialize()
+                nested_machine = data['machine']
+                nested_start_state = None
+                if nested_start_state_fetcher is not None:
+                    nested_start_state = nested_start_state_fetcher(
+                        nested_machine)
+                if isinstance(nested_machine, HierarchicalFiniteMachine):
+                    nested_machine.initialize(
+                        start_state=nested_start_state,
+                        nested_start_state_fetcher=nested_start_state_fetcher)
+                else:
+                    nested_machine.initialize(start_state=nested_start_state)
 
     @property
     def nested_machines(self):
+        """Dictionary of **all** nested state machines this machine may use."""
         return self._nested_machines

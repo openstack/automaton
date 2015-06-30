@@ -188,6 +188,10 @@ class FiniteMachine(object):
             raise excp.NotFound("Can not add a transition on event '%s' that"
                                 " ends in a undefined state '%s'"
                                 % (event, end))
+        if self._states[start]['terminal']:
+            raise excp.InvalidState("Can not add a transition on event '%s'"
+                                    " that starts in the terminal state '%s'"
+                                    % (event, start))
         self._transitions[start][event] = _Jump(end,
                                                 self._states[end]['on_enter'],
                                                 self._states[start]['on_exit'])

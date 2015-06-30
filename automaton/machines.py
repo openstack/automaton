@@ -143,6 +143,15 @@ class FiniteMachine(object):
         }
         self._transitions[state] = collections.OrderedDict()
 
+    def is_actionable_event(self, event):
+        """Check whether the event is actionable in the current state."""
+        current = self._current
+        if current is None:
+            return False
+        if event not in self._transitions[current.name]:
+            return False
+        return True
+
     def add_reaction(self, state, event, reaction, *args, **kwargs):
         """Adds a reaction that may get triggered by the given event & state.
 

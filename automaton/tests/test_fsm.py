@@ -49,6 +49,11 @@ class FSMTest(testcase.TestCase):
         self.jumper.add_reaction('up', 'jump', lambda *args: 'fall')
         self.jumper.add_reaction('down', 'fall', lambda *args: 'jump')
 
+    def test_actionable(self):
+        self.jumper.initialize()
+        self.assertTrue(self.jumper.is_actionable_event('jump'))
+        self.assertFalse(self.jumper.is_actionable_event('fall'))
+
     def test_bad_start_state(self):
         m = self._create_fsm('unknown', add_start=False)
         r = runners.FiniteRunner(m)

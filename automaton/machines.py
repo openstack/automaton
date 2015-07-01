@@ -20,6 +20,7 @@ from debtcollector import removals
 import prettytable
 import six
 
+from automaton import _utils as utils
 from automaton import exceptions as excp
 
 
@@ -337,35 +338,23 @@ class FiniteMachine(object):
                     target = self._transitions[state][event]
                     row = [pretty_state, event, target.name]
                     if target.on_enter is not None:
-                        try:
-                            row.append(target.on_enter.__name__)
-                        except AttributeError:
-                            row.append(target.on_enter)
+                        row.append(utils.get_callback_name(target.on_enter))
                     else:
                         row.append(empty)
                     if target.on_exit is not None:
-                        try:
-                            row.append(target.on_exit.__name__)
-                        except AttributeError:
-                            row.append(target.on_exit)
+                        row.append(utils.get_callback_name(target.on_exit))
                     else:
                         row.append(empty)
                     tbl.add_row(row)
             else:
                 on_enter = self._states[state]['on_enter']
                 if on_enter is not None:
-                    try:
-                        on_enter = on_enter.__name__
-                    except AttributeError:
-                        pass
+                    on_enter = utils.get_callback_name(on_enter)
                 else:
                     on_enter = empty
                 on_exit = self._states[state]['on_exit']
                 if on_exit is not None:
-                    try:
-                        on_exit = on_exit.__name__
-                    except AttributeError:
-                        pass
+                    on_exit = utils.get_callback_name(on_exit)
                 else:
                     on_exit = empty
                 tbl.add_row([pretty_state, empty, empty, on_enter, on_exit])

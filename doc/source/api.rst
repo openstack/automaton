@@ -6,6 +6,9 @@ API
 Machines
 --------
 
+.. autoclass:: automaton.machines.State
+    :members:
+
 .. autoclass:: automaton.machines.FiniteMachine
     :members:
 

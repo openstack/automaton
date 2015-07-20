@@ -42,6 +42,7 @@ Transitioning a simple machine
     m.process_event('fall')
     print(m.pformat())
     print(m.current_state)
+    print(m.terminated)
 
 **Expected output:**
 

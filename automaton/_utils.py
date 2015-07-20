@@ -42,7 +42,9 @@ def get_callback_name(cb):
         return repr(cb)
     else:
         try:
-            segments.insert(0, cb.__module__)
+            # When running under sphinx it appears this can be none?
+            if cb.__module__:
+                segments.insert(0, cb.__module__)
         except AttributeError:
             pass
         return ".".join(segments)

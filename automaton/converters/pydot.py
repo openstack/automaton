@@ -25,7 +25,7 @@ except ImportError:
 
 def convert(machine, graph_name,
             graph_attrs=None, node_attrs_cb=None, edge_attrs_cb=None,
-            add_start_state=True):
+            add_start_state=True, name_translations=None):
     """Translates the state machine into a pydot graph.
 
     :param machine: state machine to convert
@@ -55,11 +55,16 @@ def convert(machine, graph_name,
                             ``default_start_state`` then this does nothing,
                             even if enabled)
     :type add_start_state: bool
+    :param name_translations: a dict that provides alternative ``state``
+                              string names for each state
+    :type name_translations: dict
     """
     if not PYDOT_AVAILABLE:
         raise RuntimeError("pydot (or pydot2 or equivalent) is required"
                            " to convert a state machine into a pydot"
                            " graph")
+    if not name_translations:
+        name_translations = {}
     graph_kwargs = {
         'rankdir': 'LR',
         'nodesep': '0.25',
@@ -82,14 +87,17 @@ def convert(machine, graph_name,
             start_node_attrs = node_attrs.copy()
             if node_attrs_cb is not None:
                 start_node_attrs.update(node_attrs_cb(start_state))
-            nodes[start_state] = pydot.Node(start_state,
+            pretty_start_state = name_translations.get(start_state,
+                                                       start_state)
+            nodes[start_state] = pydot.Node(pretty_start_state,
                                             **start_node_attrs)
             g.add_node(nodes[start_state])
         if end_state not in nodes:
             end_node_attrs = node_attrs.copy()
             if node_attrs_cb is not None:
                 end_node_attrs.update(node_attrs_cb(end_state))
-            nodes[end_state] = pydot.Node(end_state, **end_node_attrs)
+            pretty_end_state = name_translations.get(end_state, end_state)
+            nodes[end_state] = pydot.Node(pretty_end_state, **end_node_attrs)
             g.add_node(nodes[end_state])
         edge_attrs = {}
         if edge_attrs_cb is not None:

@@ -188,8 +188,17 @@ class FiniteMachine(object):
             raise excp.Duplicate("State '%s' reaction to event '%s'"
                                  " already defined" % (state, event))
 
-    def add_transition(self, start, end, event):
-        """Adds an allowed transition from start -> end for the given event."""
+    def add_transition(self, start, end, event, replace=False):
+        """Adds an allowed transition from start -> end for the given event.
+
+        :param start: starting state
+        :param end: ending state
+        :param event: event that causes start state to
+                      transition to end state
+        :param replace: replace existing event instead of raising a
+                        :py:class:`~automaton.exceptions.Duplicate` exception
+                        when the transition already exists.
+        """
         if self.frozen:
             raise excp.FrozenMachine()
         if start not in self._states:
@@ -204,9 +213,22 @@ class FiniteMachine(object):
             raise excp.InvalidState("Can not add a transition on event '%s'"
                                     " that starts in the terminal state '%s'"
                                     % (event, start))
-        self._transitions[start][event] = _Jump(end,
-                                                self._states[end]['on_enter'],
-                                                self._states[start]['on_exit'])
+        if event in self._transitions[start] and not replace:
+            target = self._transitions[start][event]
+            if target.name != end:
+                raise excp.Duplicate("Cannot add transition from"
+                                     " '%(start_state)s' to '%(end_state)s'"
+                                     " on event '%(event)s' because a"
+                                     " transition from '%(start_state)s'"
+                                     " to '%(existing_end_state)s' on"
+                                     " event '%(event)s' already exists."
+                                     % {'existing_end_state': target.name,
+                                        'end_state': end, 'event': event,
+                                        'start_state': start})
+        else:
+            target = _Jump(end, self._states[end]['on_enter'],
+                           self._states[start]['on_exit'])
+            self._transitions[start][event] = target
 
     def _pre_process_event(self, event):
         current = self._current

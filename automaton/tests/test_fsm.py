@@ -75,6 +75,21 @@ class FSMTest(testcase.TestCase):
         m = self._create_fsm('unknown')
         self.assertRaises(excp.Duplicate, m.add_state, 'unknown')
 
+    def test_duplicate_transition(self):
+        m = self.jumper
+        m.add_state('side_ways')
+        self.assertRaises(excp.Duplicate,
+                          m.add_transition, 'up', 'side_ways', 'fall')
+
+    def test_duplicate_transition_replace(self):
+        m = self.jumper
+        m.add_state('side_ways')
+        m.add_transition('up', 'side_ways', 'fall', replace=True)
+
+    def test_duplicate_transition_same_transition(self):
+        m = self.jumper
+        m.add_transition('up', 'down', 'fall')
+
     def test_duplicate_reaction(self):
         self.assertRaises(
             # Currently duplicate reactions are not allowed...

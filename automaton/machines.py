@@ -24,6 +24,31 @@ from automaton import _utils as utils
 from automaton import exceptions as excp
 
 
+class State(object):
+    """Container that defines needed components of a single state.
+
+    Usage of this and the :meth:`~.FiniteMachine.build` make creating finite
+    state machines that much easier.
+
+    :ivar name: The name of the state.
+    :ivar is_terminal: Whether this state is terminal (or not).
+    :ivar next_states: Dictionary of 'event' -> 'next state name' (or none).
+    """
+
+    def __init__(self, name, is_terminal=False, next_states=None):
+        self.name = name
+        self.is_terminal = bool(is_terminal)
+        self.next_states = next_states
+
+
+def _convert_to_states(state_space):
+    # NOTE(harlowja): if provided dicts, convert them...
+    for state in state_space:
+        if isinstance(state, dict):
+            state = State(**state)
+        yield state
+
+
 def _orderedkeys(data, sort=True):
     if sort:
         return sorted(six.iterkeys(data))
@@ -104,6 +129,26 @@ class FiniteMachine(object):
             raise excp.NotFound("Can not set the default start state to"
                                 " undefined state '%s'" % (state))
         self._default_start_state = state
+
+    @classmethod
+    def build(cls, state_space):
+        """Builds a machine from a state space listing.
+
+        Each element of this list must be an instance
+        of :py:class:`.State` or a ``dict`` with equivalent keys that
+        can be used to construct a :py:class:`.State` instance.
+        """
+        state_space = list(_convert_to_states(state_space))
+        m = cls()
+        for state in state_space:
+            m.add_state(state.name, terminal=state.is_terminal)
+        for state in state_space:
+            if state.next_states:
+                for event, next_state in six.iteritems(state.next_states):
+                    if isinstance(next_state, State):
+                        next_state = next_state.name
+                    m.add_transition(state.name, next_state, event)
+        return m
 
     @property
     def current_state(self):

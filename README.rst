@@ -10,7 +10,12 @@ Automaton
     :target: https://pypi.python.org/pypi/automaton/
     :alt: Downloads
 
-Friendly state machines for python.
+Friendly state machines for python. The goal of this library is to provide
+well documented state machine classes and associated utilities. The state
+machine pattern (or the implemented variation there-of) is a commonly
+used pattern and has a multitude of various usages. Some of the usages
+for this library include providing state & transition validation and
+running/scheduling/analyzing the execution of tasks.
 
 * Free software: Apache license
 * Documentation: http://docs.openstack.org/developer/automaton

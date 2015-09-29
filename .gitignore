@@ -34,6 +34,7 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
+.testrepository/
 .tox/
 .coverage
 .cache
@@ -49,6 +50,10 @@ coverage.xml
 
 # Sphinx documentation
 doc/build/
+
+# pbr generates these
+AUTHORS
+ChangeLog
 
 # PyBuilder
 target/

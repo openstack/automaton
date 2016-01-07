@@ -113,16 +113,16 @@ class FiniteMachine(object):
 
     @property
     def default_start_state(self):
-        return self._default_start_state
-
-    @default_start_state.setter
-    def default_start_state(self, state):
         """Sets the *default* start state that the machine should use.
 
         NOTE(harlowja): this will be used by ``initialize`` but only if that
         function is not given its own ``start_state`` that overrides this
         default.
         """
+        return self._default_start_state
+
+    @default_start_state.setter
+    def default_start_state(self, state):
         if self.frozen:
             raise excp.FrozenMachine()
         if state not in self._states:

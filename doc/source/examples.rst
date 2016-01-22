@@ -131,6 +131,7 @@ Running a complex dog-barking machine
     Leaving 'wags tail'
     Entered 'lies down'
 
+
 ------------------------------------
 Creating a complex CD-player machine
 ------------------------------------
@@ -355,3 +356,107 @@ Creating a complex CD-player machine
     =============
     Current state => closed
     =============
+
+----------------------------------------------------------
+Creating a complex CD-player machine (using a state-space)
+----------------------------------------------------------
+
+This example is equivalent to the prior one but creates a machine in
+a more declarative manner. Instead of calling ``add_state``
+and ``add_transition`` a explicit and declarative format can be used. For
+example to create the same machine:
+
+.. testcode::
+
+    from automaton import machines
+
+
+    def print_on_enter(new_state, triggered_event):
+       print("Entered '%s' due to '%s'" % (new_state, triggered_event))
+
+
+    def print_on_exit(old_state, triggered_event):
+       print("Exiting '%s' due to '%s'" % (old_state, triggered_event))
+
+    # This will contain all the states and transitions that our machine will
+    # allow, the format is relatively simple and designed to be easy to use.
+    state_space = [
+        {
+            'name': 'stopped',
+            'next_states': {
+                # On event 'play' transition to the 'playing' state.
+                'play': 'playing',
+                'open_close': 'opened',
+                'stop': 'stopped',
+            },
+            'on_enter': print_on_enter,
+            'on_exit': print_on_exit,
+        },
+        {
+            'name': 'opened',
+            'next_states': {
+                'open_close': 'closed',
+            },
+            'on_enter': print_on_enter,
+            'on_exit': print_on_exit,
+        },
+        {
+            'name': 'closed',
+            'next_states': {
+                'open_close': 'opened',
+                'cd_detected': 'stopped',
+            },
+            'on_enter': print_on_enter,
+            'on_exit': print_on_exit,
+        },
+        {
+            'name': 'playing',
+            'next_states': {
+                'stop': 'stopped',
+                'pause': 'paused',
+                'open_close': 'opened',
+            },
+            'on_enter': print_on_enter,
+            'on_exit': print_on_exit,
+        },
+        {
+            'name': 'paused',
+            'next_states': {
+                'play': 'playing',
+                'stop': 'stopped',
+                'open_close': 'opened',
+            },
+            'on_enter': print_on_enter,
+            'on_exit': print_on_exit,
+        },
+    ]
+
+    m = machines.FiniteMachine.build(state_space)
+    m.default_start_state = 'closed'
+    print(m.pformat())
+
+**Expected output:**
+
+.. testoutput::
+
+    +-----------+-------------+---------+----------------+---------------+
+    |   Start   |    Event    |   End   |    On Enter    |    On Exit    |
+    +-----------+-------------+---------+----------------+---------------+
+    | closed[^] | cd_detected | stopped | print_on_enter | print_on_exit |
+    | closed[^] |  open_close |  opened | print_on_enter | print_on_exit |
+    |   opened  |  open_close |  closed | print_on_enter | print_on_exit |
+    |   paused  |  open_close |  opened | print_on_enter | print_on_exit |
+    |   paused  |     play    | playing | print_on_enter | print_on_exit |
+    |   paused  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  playing  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  playing  |    pause    |  paused | print_on_enter | print_on_exit |
+    |  playing  |     stop    | stopped | print_on_enter | print_on_exit |
+    |  stopped  |  open_close |  opened | print_on_enter | print_on_exit |
+    |  stopped  |     play    | playing | print_on_enter | print_on_exit |
+    |  stopped  |     stop    | stopped | print_on_enter | print_on_exit |
+    +-----------+-------------+---------+----------------+---------------+
+
+.. note::
+
+    As can be seen the two tables from this example and the prior one are
+    exactly the same.

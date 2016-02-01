@@ -33,12 +33,18 @@ class State(object):
     :ivar name: The name of the state.
     :ivar is_terminal: Whether this state is terminal (or not).
     :ivar next_states: Dictionary of 'event' -> 'next state name' (or none).
+    :ivar on_enter: callback that will be called when the state is entered.
+    :ivar on_exit: callback that will be called when the state is exited.
     """
 
-    def __init__(self, name, is_terminal=False, next_states=None):
+    def __init__(self, name,
+                 is_terminal=False, next_states=None,
+                 on_enter=None, on_exit=None):
         self.name = name
         self.is_terminal = bool(is_terminal)
         self.next_states = next_states
+        self.on_enter = on_enter
+        self.on_exit = on_exit
 
 
 def _convert_to_states(state_space):
@@ -141,7 +147,10 @@ class FiniteMachine(object):
         state_space = list(_convert_to_states(state_space))
         m = cls()
         for state in state_space:
-            m.add_state(state.name, terminal=state.is_terminal)
+            m.add_state(state.name,
+                        terminal=state.is_terminal,
+                        on_enter=state.on_enter,
+                        on_exit=state.on_exit)
         for state in state_space:
             if state.next_states:
                 for event, next_state in six.iteritems(state.next_states):

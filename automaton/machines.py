@@ -153,7 +153,7 @@ class FiniteMachine(object):
                         on_exit=state.on_exit)
         for state in state_space:
             if state.next_states:
-                for event, next_state in six.iteritems(state.next_states):
+                for event, next_state in state.next_states.items():
                     if isinstance(next_state, State):
                         next_state = next_state.name
                     m.add_transition(state.name, next_state, event)
@@ -367,11 +367,11 @@ class FiniteMachine(object):
         else:
             c.frozen = self.frozen
         if not shallow:
-            for state, data in six.iteritems(self._states):
+            for state, data in self._states.items():
                 copied_data = data.copy()
                 copied_data['reactions'] = copied_data['reactions'].copy()
                 c._states[state] = copied_data
-            for state, data in six.iteritems(self._transitions):
+            for state, data in self._transitions.items():
                 c._transitions[state] = data.copy()
         else:
             c._transitions = self._transitions
@@ -402,7 +402,7 @@ class FiniteMachine(object):
     def __iter__(self):
         """Iterates over (start, event, end) transition tuples."""
         for state in six.iterkeys(self._states):
-            for event, target in six.iteritems(self._transitions[state]):
+            for event, target in self._transitions[state].items():
                 yield (state, event, target.name)
 
     def pformat(self, sort=True, empty='.'):

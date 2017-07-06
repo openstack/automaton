@@ -25,8 +25,14 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.viewcode',
-    'oslosphinx',
+    'openstackdocstheme',
 ]
+
+# openstackdocstheme options
+repository_name = 'openstack/automaton'
+bug_project = 'automaton'
+bug_tag = ''
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
@@ -59,6 +65,7 @@ pygments_style = 'sphinx'
 # html_theme_path = ["."]
 # html_theme = '_theme'
 # html_static_path = ['static']
+html_theme = 'openstackdocs'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = '%sdoc' % project

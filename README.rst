@@ -18,6 +18,6 @@ for this library include providing state & transition validation and
 running/scheduling/analyzing the execution of tasks.
 
 * Free software: Apache license
-* Documentation: http://docs.openstack.org/automaton/latest/
-* Source: http://git.openstack.org/cgit/openstack/automaton
-* Bugs: http://bugs.launchpad.net/automaton
+* Documentation: https://docs.openstack.org/automaton/latest/
+* Source: https://git.openstack.org/cgit/openstack/automaton
+* Bugs: https://bugs.launchpad.net/automaton

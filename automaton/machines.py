@@ -14,7 +14,6 @@
 
 import collections
 
-from debtcollector import removals
 import prettytable
 import six
 
@@ -102,16 +101,10 @@ class FiniteMachine(object):
         return cls.Effect(new_state['reactions'].get(event),
                           new_state["terminal"])
 
-    @removals.removed_kwarg('default_start_state',
-                            message="The usage of 'default_start_state' via"
-                            " the machine constructor is deprecated and will"
-                            " be removed in a future version; usage of"
-                            " the 'default_start_state' property setter is"
-                            " recommended.")
-    def __init__(self, default_start_state=None):
+    def __init__(self):
         self._transitions = {}
         self._states = collections.OrderedDict()
-        self._default_start_state = default_start_state
+        self._default_start_state = None
         self._current = None
         self.frozen = False
 
@@ -460,9 +453,8 @@ class HierarchicalFiniteMachine(FiniteMachine):
     Effect = collections.namedtuple('Effect',
                                     'reaction,terminal,machine')
 
-    def __init__(self, default_start_state=None):
-        super(HierarchicalFiniteMachine, self).__init__(
-            default_start_state=default_start_state)
+    def __init__(self):
+        super(HierarchicalFiniteMachine, self).__init__()
         self._nested_machines = {}
 
     @classmethod

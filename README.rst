@@ -3,11 +3,11 @@ Automaton
 =========
 
 .. image:: https://img.shields.io/pypi/v/automaton.svg
-    :target: https://pypi.python.org/pypi/automaton/
+    :target: https://pypi.org/project/automaton/
     :alt: Latest Version
 
 .. image:: https://img.shields.io/pypi/dm/automaton.svg
-    :target: https://pypi.python.org/pypi/automaton/
+    :target: https://pypi.org/project/automaton/
     :alt: Downloads
 
 Friendly state machines for python. The goal of this library is to provide

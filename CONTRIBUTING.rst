@@ -22,7 +22,7 @@ Bugs should be filed on Launchpad, not GitHub:
 
 The mailing list is (prefix subjects with "[Oslo][Automaton]"):
 
-   http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev
+   http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-discuss
 
 Questions and discussions take place in #openstack-state-management on
 irc.freenode.net.

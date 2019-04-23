@@ -19,5 +19,5 @@ running/scheduling/analyzing the execution of tasks.
 
 * Free software: Apache license
 * Documentation: https://docs.openstack.org/automaton/latest/
-* Source: https://git.openstack.org/cgit/openstack/automaton
+* Source: https://opendev.org/openstack/automaton
 * Bugs: https://bugs.launchpad.net/automaton

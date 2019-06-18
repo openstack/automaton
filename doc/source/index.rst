@@ -1,6 +1,6 @@
-=======================================
- Welcome to automaton's documentation!
-=======================================
+=====================================
+Welcome to automaton's documentation!
+=====================================
 
 Friendly state machines for python.
 

@@ -1,6 +1,6 @@
-======================
- automaton User Guide
-======================
+====================
+automaton User Guide
+====================
 
 .. toctree::
    :maxdepth: 2

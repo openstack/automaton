@@ -55,5 +55,9 @@ doc/build/
 AUTHORS
 ChangeLog
 
+# release note artifacts (reno)
+RELEASENOTES.rst
+releasenotes/notes/reno.cache
+
 # PyBuilder
 target/

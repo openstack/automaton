@@ -20,7 +20,6 @@ from automaton import exceptions as excp
 from automaton import machines
 from automaton import runners
 
-import six
 from testtools import testcase
 
 
@@ -262,13 +261,13 @@ class FSMTest(testcase.TestCase):
         self.assertFalse(self.jumper.terminated)
         self.assertEqual([('down', 'up'), ('up', 'down'), ('down', 'up')],
                          up_downs)
-        self.assertRaises(StopIteration, six.next, it)
+        self.assertRaises(StopIteration, next, it)
 
     def test_run_send_fail(self):
         up_downs = []
         runner = runners.FiniteRunner(self.jumper)
         it = runner.run_iter('jump')
-        up_downs.append(six.next(it))
+        up_downs.append(next(it))
         self.assertRaises(excp.NotFound, it.send, 'fail')
         it.close()
         self.assertEqual([('down', 'up')], up_downs)
@@ -364,7 +363,7 @@ class HFSMTest(FSMTest):
 
         def phone_reaction(old_state, new_state, event, chat_iter):
             try:
-                six.next(chat_iter)
+                next(chat_iter)
             except StopIteration:
                 return 'finish'
             else:

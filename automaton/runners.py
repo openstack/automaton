@@ -14,8 +14,6 @@
 
 import abc
 
-import six
-
 from automaton import exceptions as excp
 from automaton import machines
 
@@ -26,8 +24,7 @@ _JUMPER_NOT_FOUND_TPL = ("Unable to progress since no reaction (or"
                          " in response to event '%s')")
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Runner(object):
+class Runner(metaclass=abc.ABCMeta):
     """Machine runner used to run a state machine.
 
     Only **one** runner per machine should be active at the same time (aka

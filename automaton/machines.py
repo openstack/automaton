@@ -15,7 +15,6 @@
 import collections
 
 import prettytable
-import six
 
 from automaton import _utils as utils
 from automaton import exceptions as excp
@@ -54,9 +53,9 @@ def _convert_to_states(state_space):
 
 def _orderedkeys(data, sort=True):
     if sort:
-        return sorted(six.iterkeys(data))
+        return sorted(data)
     else:
-        return list(six.iterkeys(data))
+        return list(data)
 
 
 class _Jump(object):
@@ -178,10 +177,10 @@ class FiniteMachine(object):
         if state in self._states:
             raise excp.Duplicate("State '%s' already defined" % state)
         if on_enter is not None:
-            if not six.callable(on_enter):
+            if not callable(on_enter):
                 raise ValueError("On enter callback must be callable")
         if on_exit is not None:
-            if not six.callable(on_exit):
+            if not callable(on_exit):
                 raise ValueError("On exit callback must be callable")
         self._states[state] = {
             'terminal': bool(terminal),
@@ -225,7 +224,7 @@ class FiniteMachine(object):
         if state not in self._states:
             raise excp.NotFound("Can not add a reaction to event '%s' for an"
                                 " undefined state '%s'" % (event, state))
-        if not six.callable(reaction):
+        if not callable(reaction):
             raise ValueError("Reaction callback must be callable")
         if event not in self._states[state]['reactions']:
             self._states[state]['reactions'][event] = (reaction, args, kwargs)
@@ -380,19 +379,19 @@ class FiniteMachine(object):
     @property
     def states(self):
         """Returns the state names."""
-        return list(six.iterkeys(self._states))
+        return list(self._states)
 
     @property
     def events(self):
         """Returns how many events exist."""
         c = 0
-        for state in six.iterkeys(self._states):
+        for state in self._states:
             c += len(self._transitions[state])
         return c
 
     def __iter__(self):
         """Iterates over (start, event, end) transition tuples."""
-        for state in six.iterkeys(self._states):
+        for state in self._states:
             for event, target in self._transitions[state].items():
                 yield (state, event, target.name)
 
@@ -515,7 +514,7 @@ class HierarchicalFiniteMachine(FiniteMachine):
         """
         super(HierarchicalFiniteMachine, self).initialize(
             start_state=start_state)
-        for data in six.itervalues(self._states):
+        for data in self._states.values():
             if 'machine' in data:
                 nested_machine = data['machine']
                 nested_start_state = None

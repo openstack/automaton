@@ -24,5 +24,5 @@ The mailing list is (prefix subjects with "[Oslo][Automaton]"):
 
    https://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-discuss
 
-Questions and discussions take place in #openstack-state-management on
-irc.freenode.net.
+Questions and discussions take place in #openstack-oslo on
+irc.OFTC.net.

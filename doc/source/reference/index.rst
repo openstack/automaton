@@ -14,6 +14,7 @@ Machines
     :special-members: __iter__, __contains__
 
 .. autoclass:: automaton.machines.HierarchicalFiniteMachine
+    :noindex:
     :members:
 
 -------

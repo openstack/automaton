@@ -55,8 +55,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'automaton Release Notes'
-copyright = u'2016, automaton Developers'
+project = 'automaton Release Notes'
+copyright = '2016, automaton Developers'
 
 
 # Release notes do not need a version number in the title, they
@@ -207,8 +207,8 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     ('index', 'automatonReleaseNotes.tex',
-     u'automaton Release Notes Documentation',
-     u'automaton Developers', 'manual'),
+     'automaton Release Notes Documentation',
+     'automaton Developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -238,8 +238,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'automatonreleasenotes',
-     u'automaton Release Notes Documentation',
-     [u'automaton Developers'], 1)
+     'automaton Release Notes Documentation',
+     ['automaton Developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -253,8 +253,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'automatonReleaseNotes',
-     u'automaton Release Notes Documentation',
-     u'automaton Developers', 'automatonReleaseNotes',
+     'automaton Release Notes Documentation',
+     'automaton Developers', 'automatonReleaseNotes',
      'An OpenStack library for parsing configuration options from the command'
      ' line and configuration files.',
      'Miscellaneous'),

@@ -352,10 +352,7 @@ class FiniteMachine(object):
         """
         c = type(self)()
         c._default_start_state = self._default_start_state
-        if unfreeze and self.frozen:
-            c.frozen = False
-        else:
-            c.frozen = self.frozen
+        c.frozen = not unfreeze and self.frozen
         if not shallow:
             for state, data in self._states.items():
                 copied_data = data.copy()

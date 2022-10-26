@@ -384,10 +384,7 @@ class FiniteMachine(object):
     @property
     def events(self):
         """Returns how many events exist."""
-        c = 0
-        for state in self._states:
-            c += len(self._transitions[state])
-        return c
+        return sum(len(self._transitions[state]) for state in self._states)
 
     def __iter__(self):
         """Iterates over (start, event, end) transition tuples."""

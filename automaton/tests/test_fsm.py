@@ -39,7 +39,7 @@ class FSMTest(testcase.TestCase):
         return m
 
     def setUp(self):
-        super(FSMTest, self).setUp()
+        super().setUp()
         # NOTE(harlowja): this state machine will never stop if run() is used.
         self.jumper = self._create_fsm("down", add_states=['up', 'down'])
         self.jumper.add_transition('down', 'up', 'jump')

@@ -61,7 +61,7 @@ class FiniteRunner(Runner):
         """Create a runner for the given machine."""
         if not isinstance(machine, (machines.FiniteMachine,)):
             raise TypeError("FiniteRunner only works with FiniteMachine(s)")
-        super(FiniteRunner, self).__init__(machine)
+        super().__init__(machine)
 
     def run(self, event, initialize=True):
         for transition in self.run_iter(event, initialize=initialize):
@@ -104,7 +104,7 @@ class HierarchicalRunner(Runner):
         if not isinstance(machine, (machines.HierarchicalFiniteMachine,)):
             raise TypeError("HierarchicalRunner only works with"
                             " HierarchicalFiniteMachine(s)")
-        super(HierarchicalRunner, self).__init__(machine)
+        super().__init__(machine)
 
     def run(self, event, initialize=True):
         for transition in self.run_iter(event, initialize=initialize):

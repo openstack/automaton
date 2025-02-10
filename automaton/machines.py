@@ -20,7 +20,7 @@ from automaton import _utils as utils
 from automaton import exceptions as excp
 
 
-class State(object):
+class State:
     """Container that defines needed components of a single state.
 
     Usage of this and the :meth:`~.FiniteMachine.build` make creating finite
@@ -58,7 +58,7 @@ def _orderedkeys(data, sort=True):
         return list(data)
 
 
-class _Jump(object):
+class _Jump:
     """A FSM transition tracks this data while jumping."""
     def __init__(self, name, on_enter, on_exit):
         self.name = name
@@ -66,7 +66,7 @@ class _Jump(object):
         self.on_exit = on_exit
 
 
-class FiniteMachine(object):
+class FiniteMachine:
     """A finite state machine.
 
     This state machine can be used to automatically run a given set of
@@ -413,7 +413,7 @@ class FiniteMachine(object):
                 postfix_markings.append("^")
             if self._states[state]['terminal']:
                 postfix_markings.append("$")
-            pretty_state = "%s%s" % ("".join(prefix_markings), state)
+            pretty_state = "{}{}".format("".join(prefix_markings), state)
             if postfix_markings:
                 pretty_state += "[%s]" % "".join(postfix_markings)
             if self._transitions[state]:
@@ -453,7 +453,7 @@ class HierarchicalFiniteMachine(FiniteMachine):
                                     'reaction,terminal,machine')
 
     def __init__(self):
-        super(HierarchicalFiniteMachine, self).__init__()
+        super().__init__()
         self._nested_machines = {}
 
     @classmethod
@@ -475,15 +475,15 @@ class HierarchicalFiniteMachine(FiniteMachine):
         if machine is not None and not isinstance(machine, FiniteMachine):
             raise ValueError(
                 "Nested state machines must themselves be state machines")
-        super(HierarchicalFiniteMachine, self).add_state(
+        super().add_state(
             state, terminal=terminal, on_enter=on_enter, on_exit=on_exit)
         if machine is not None:
             self._states[state]['machine'] = machine
             self._nested_machines[state] = machine
 
     def copy(self, shallow=False, unfreeze=False):
-        c = super(HierarchicalFiniteMachine, self).copy(shallow=shallow,
-                                                        unfreeze=unfreeze)
+        c = super().copy(shallow=shallow,
+                         unfreeze=unfreeze)
         if shallow:
             c._nested_machines = self._nested_machines
         else:
@@ -512,7 +512,7 @@ class HierarchicalFiniteMachine(FiniteMachine):
                                            also be used to initialize any state
                                            machines they contain (recursively).
         """
-        super(HierarchicalFiniteMachine, self).initialize(
+        super().initialize(
             start_state=start_state)
         for data in self._states.values():
             if 'machine' in data:

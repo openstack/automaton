@@ -12,9 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import inspect
-
-
 def get_callback_name(cb):
     """Tries to get a callbacks fully-qualified name.
 
@@ -26,16 +23,9 @@ def get_callback_name(cb):
     except AttributeError:
         try:
             segments.append(cb.__name__)
-            if inspect.ismethod(cb):
-                try:
-                    # This attribute doesn't exist on py3.x or newer, so
-                    # we optionally ignore it... (on those versions of
-                    # python `__qualname__` should have been found anyway).
-                    segments.insert(0, cb.im_class.__name__)
-                except AttributeError:
-                    pass
         except AttributeError:
             pass
+
     if not segments:
         return repr(cb)
     else:

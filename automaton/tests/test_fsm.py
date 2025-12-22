@@ -111,7 +111,7 @@ class FSMTest(testcase.TestCase):
         self.assertEqual({'up': ['jump'], 'down': ['fall']}, dict(entered))
 
     def test_build_transitions_dct(self):
-        space = [
+        space: list[machines.StateDict] = [
             {
                 'name': 'down',
                 'is_terminal': False,
@@ -383,11 +383,11 @@ class FSMTest(testcase.TestCase):
 
 class HFSMTest(FSMTest):
     @staticmethod
-    def _create_fsm(
+    def _create_fsm(  # type: ignore[override]
         start_state, add_start=True, hierarchical=False, add_states=None
     ):
         if hierarchical:
-            m = machines.HierarchicalFiniteMachine()
+            m: machines.FiniteMachine = machines.HierarchicalFiniteMachine()
         else:
             m = machines.FiniteMachine()
         if add_start:

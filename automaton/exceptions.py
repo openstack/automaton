@@ -36,5 +36,5 @@ class Duplicate(AutomatonException):
 class FrozenMachine(AutomatonException):
     """Exception raised when a frozen machine is modified."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Frozen machine can't be modified")

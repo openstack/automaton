@@ -12,8 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from typing import Any
 
-def get_callback_name(cb):
+
+def get_callback_name(cb: Any) -> str:
     """Tries to get a callbacks fully-qualified name."""
     segments = [cb.__qualname__]
 

@@ -13,6 +13,8 @@
 #    under the License.
 
 import abc
+from collections.abc import Generator
+from typing import Any
 
 from automaton import exceptions as excp
 from automaton import machines
@@ -34,15 +36,17 @@ class Runner(metaclass=abc.ABCMeta):
     the same time).
     """
 
-    def __init__(self, machine):
+    def __init__(self, machine: machines.FiniteMachine) -> None:
         self._machine = machine
 
     @abc.abstractmethod
-    def run(self, event, initialize=True):
+    def run(self, event: str, initialize: bool = True) -> None:
         """Runs the state machine, using reactions only."""
 
     @abc.abstractmethod
-    def run_iter(self, event, initialize=True):
+    def run_iter(
+        self, event: str, initialize: bool = True
+    ) -> Generator[tuple[str | None, str | None], Any, None]:
         """Returns a iterator/generator that will run the state machine.
 
         NOTE(harlowja): only one runner iterator/generator should be active for
@@ -60,17 +64,19 @@ class FiniteRunner(Runner):
     the same time).
     """
 
-    def __init__(self, machine):
+    def __init__(self, machine: machines.FiniteMachine) -> None:
         """Create a runner for the given machine."""
         if not isinstance(machine, (machines.FiniteMachine,)):
             raise TypeError("FiniteRunner only works with FiniteMachine(s)")
         super().__init__(machine)
 
-    def run(self, event, initialize=True):
+    def run(self, event: str, initialize: bool = True) -> None:
         for transition in self.run_iter(event, initialize=initialize):
             pass
 
-    def run_iter(self, event, initialize=True):
+    def run_iter(
+        self, event: str, initialize: bool = True
+    ) -> Generator[tuple[str | None, str | None], Any, None]:
         if initialize:
             self._machine.initialize()
         while True:
@@ -102,7 +108,7 @@ class HierarchicalRunner(Runner):
     the same time).
     """
 
-    def __init__(self, machine):
+    def __init__(self, machine: machines.HierarchicalFiniteMachine) -> None:
         """Create a runner for the given machine."""
         if not isinstance(machine, (machines.HierarchicalFiniteMachine,)):
             raise TypeError(
@@ -111,12 +117,14 @@ class HierarchicalRunner(Runner):
             )
         super().__init__(machine)
 
-    def run(self, event, initialize=True):
+    def run(self, event: str, initialize: bool = True) -> None:
         for transition in self.run_iter(event, initialize=initialize):
             pass
 
     @staticmethod
-    def _process_event(machines, event):
+    def _process_event(
+        machines: list[machines.FiniteMachine], event: str
+    ) -> machines.HierarchicalFiniteMachine.Effect:
         """Matches a event to the machine hierarchy.
 
         If the lowest level machine does not handle the event, then the
@@ -141,9 +149,11 @@ class HierarchicalRunner(Runner):
                     machine._current = None
                     machines.pop()
             else:
-                return result
+                return result  # type: ignore[return-value]
 
-    def run_iter(self, event, initialize=True):
+    def run_iter(
+        self, event: str, initialize: bool = True
+    ) -> Generator[tuple[str | None, str | None], Any, None]:
         """Returns a iterator/generator that will run the state machine.
 
         This will keep a stack (hierarchy) of machines active and jumps through

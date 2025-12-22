@@ -12,6 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections.abc import Callable, Mapping
+from typing import Any
+
+from automaton import machines
+
 try:
     import pydot
 
@@ -19,37 +24,35 @@ try:
 except ImportError:
     PYDOT_AVAILABLE = False
 
+NodeAttrsCallbackT = Callable[[str], Mapping[str, Any]]
+EdgeAttrsCallbackT = Callable[[str, str, str], Mapping[str, Any]]
+
 
 def convert(
-    machine,
-    graph_name,
-    graph_attrs=None,
-    node_attrs_cb=None,
-    edge_attrs_cb=None,
-    add_start_state=True,
-    name_translations=None,
-):
+    machine: machines.FiniteMachine,
+    graph_name: str,
+    graph_attrs: Mapping[str, Any] | None = None,
+    node_attrs_cb: NodeAttrsCallbackT | None = None,
+    edge_attrs_cb: EdgeAttrsCallbackT | None = None,
+    add_start_state: bool = True,
+    name_translations: Mapping[str, str] | None = None,
+) -> Any:
     """Translates the state machine into a pydot graph.
 
     :param machine: state machine to convert
-    :type machine: FiniteMachine
     :param graph_name: name of the graph to be created
-    :type graph_name: string
     :param graph_attrs: any initial graph attributes to set
                         (see http://www.graphviz.org/doc/info/attrs.html for
                         what these can be)
-    :type graph_attrs: dict
     :param node_attrs_cb: a callback that takes one argument ``state``
                           and is expected to return a dict of node attributes
                           (see http://www.graphviz.org/doc/info/attrs.html for
                           what these can be)
-    :type node_attrs_cb: callback
     :param edge_attrs_cb: a callback that takes three arguments ``start_state,
                           event, end_state`` and is expected to return a dict
                           of edge attributes (see
                           http://www.graphviz.org/doc/info/attrs.html for
                           what these can be)
-    :type edge_attrs_cb: callback
     :param add_start_state: when enabled this creates a *private* start state
                             with the name ``__start__`` that will be a point
                             node that will have a dotted edge to the
@@ -57,10 +60,8 @@ def convert(
                             defined (if your machine has no actively defined
                             ``default_start_state`` then this does nothing,
                             even if enabled)
-    :type add_start_state: bool
     :param name_translations: a dict that provides alternative ``state``
                               string names for each state
-    :type name_translations: dict
     """
     if not PYDOT_AVAILABLE:
         raise RuntimeError(
@@ -83,7 +84,7 @@ def convert(
         graph_kwargs.update(graph_attrs)
     graph_kwargs['graph_name'] = graph_name
     g = pydot.Dot(**graph_kwargs)
-    node_attrs = {
+    node_attrs: dict[str, Any] = {
         'fontsize': '11',
     }
     nodes = {}
@@ -106,7 +107,7 @@ def convert(
             pretty_end_state = name_translations.get(end_state, end_state)
             nodes[end_state] = pydot.Node(pretty_end_state, **end_node_attrs)
             g.add_node(nodes[end_state])
-        edge_attrs = {}
+        edge_attrs: dict[str, Any] = {}
         if edge_attrs_cb is not None:
             edge_attrs.update(edge_attrs_cb(start_state, event, end_state))
         g.add_edge(

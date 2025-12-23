@@ -62,9 +62,13 @@ html_static_path = ['_static']
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('index', 'automatonReleaseNotes.tex',
-     'automaton Release Notes Documentation',
-     'automaton Developers', 'manual'),
+    (
+        'index',
+        'automatonReleaseNotes.tex',
+        'automaton Release Notes Documentation',
+        'automaton Developers',
+        'manual',
+    ),
 ]
 
 # -- Options for Internationalization output ------------------------------

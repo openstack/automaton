@@ -12,10 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-def get_callback_name(cb):
-    """Tries to get a callbacks fully-qualified name.
 
-    """
+def get_callback_name(cb):
+    """Tries to get a callbacks fully-qualified name."""
     segments = [cb.__qualname__]
 
     # When running under sphinx it appears this can be none?

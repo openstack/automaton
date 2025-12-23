@@ -18,10 +18,12 @@ from automaton import exceptions as excp
 from automaton import machines
 
 
-_JUMPER_NOT_FOUND_TPL = ("Unable to progress since no reaction (or"
-                         " sent event) has been made available in"
-                         " new state '%s' (moved to from state '%s'"
-                         " in response to event '%s')")
+_JUMPER_NOT_FOUND_TPL = (
+    "Unable to progress since no reaction (or"
+    " sent event) has been made available in"
+    " new state '%s' (moved to from state '%s'"
+    " in response to event '%s')"
+)
 
 
 class Runner(metaclass=abc.ABCMeta):
@@ -31,6 +33,7 @@ class Runner(metaclass=abc.ABCMeta):
     there should not be multiple runners using the same machine instance at
     the same time).
     """
+
     def __init__(self, machine):
         self._machine = machine
 
@@ -81,9 +84,9 @@ class FiniteRunner(Runner):
             if terminal:
                 break
             if reaction is None and sent_event is None:
-                raise excp.NotFound(_JUMPER_NOT_FOUND_TPL % (new_state,
-                                                             old_state,
-                                                             event))
+                raise excp.NotFound(
+                    _JUMPER_NOT_FOUND_TPL % (new_state, old_state, event)
+                )
             elif sent_event is not None:
                 event = sent_event
             else:
@@ -102,8 +105,10 @@ class HierarchicalRunner(Runner):
     def __init__(self, machine):
         """Create a runner for the given machine."""
         if not isinstance(machine, (machines.HierarchicalFiniteMachine,)):
-            raise TypeError("HierarchicalRunner only works with"
-                            " HierarchicalFiniteMachine(s)")
+            raise TypeError(
+                "HierarchicalRunner only works with"
+                " HierarchicalFiniteMachine(s)"
+            )
         super().__init__(machine)
 
     def run(self, event, initialize=True):
@@ -175,9 +180,9 @@ class HierarchicalRunner(Runner):
                 # events if they wish to have the root machine terminate...
                 break
             if effect.reaction is None and sent_event is None:
-                raise excp.NotFound(_JUMPER_NOT_FOUND_TPL % (new_state,
-                                                             old_state,
-                                                             event))
+                raise excp.NotFound(
+                    _JUMPER_NOT_FOUND_TPL % (new_state, old_state, event)
+                )
             elif sent_event is not None:
                 event = sent_event
             else:

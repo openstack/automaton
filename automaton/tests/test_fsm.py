@@ -24,7 +24,6 @@ from testtools import testcase
 
 
 class FSMTest(testcase.TestCase):
-
     @staticmethod
     def _create_fsm(start_state, add_start=True, add_states=None):
         m = machines.FiniteMachine()
@@ -57,10 +56,12 @@ class FSMTest(testcase.TestCase):
 
     def test_build_transitions(self):
         space = [
-            machines.State('down', is_terminal=False,
-                           next_states={'jump': 'up'}),
-            machines.State('up', is_terminal=False,
-                           next_states={'fall': 'down'}),
+            machines.State(
+                'down', is_terminal=False, next_states={'jump': 'up'}
+            ),
+            machines.State(
+                'up', is_terminal=False, next_states={'fall': 'down'}
+            ),
         ]
         m = machines.FiniteMachine.build(space)
         m.default_start_state = 'down'
@@ -78,12 +79,20 @@ class FSMTest(testcase.TestCase):
             exitted[state].append(event)
 
         space = [
-            machines.State('down', is_terminal=False,
-                           next_states={'jump': 'up'},
-                           on_enter=on_enter, on_exit=on_exit),
-            machines.State('up', is_terminal=False,
-                           next_states={'fall': 'down'},
-                           on_enter=on_enter, on_exit=on_exit),
+            machines.State(
+                'down',
+                is_terminal=False,
+                next_states={'jump': 'up'},
+                on_enter=on_enter,
+                on_exit=on_exit,
+            ),
+            machines.State(
+                'up',
+                is_terminal=False,
+                next_states={'fall': 'down'},
+                on_enter=on_enter,
+                on_exit=on_exit,
+            ),
         ]
         m = machines.FiniteMachine.build(space)
         m.default_start_state = 'down'
@@ -104,11 +113,13 @@ class FSMTest(testcase.TestCase):
     def test_build_transitions_dct(self):
         space = [
             {
-                'name': 'down', 'is_terminal': False,
+                'name': 'down',
+                'is_terminal': False,
                 'next_states': {'jump': 'up'},
             },
             {
-                'name': 'up', 'is_terminal': False,
+                'name': 'up',
+                'is_terminal': False,
                 'next_states': {'fall': 'down'},
             },
         ]
@@ -119,8 +130,9 @@ class FSMTest(testcase.TestCase):
 
     def test_build_terminal(self):
         space = [
-            machines.State('down', is_terminal=False,
-                           next_states={'jump': 'fell_over'}),
+            machines.State(
+                'down', is_terminal=False, next_states={'jump': 'fell_over'}
+            ),
             machines.State('fell_over', is_terminal=True),
         ]
         m = machines.FiniteMachine.build(space)
@@ -148,8 +160,9 @@ class FSMTest(testcase.TestCase):
     def test_no_add_transition_terminal(self):
         m = self._create_fsm('up')
         m.add_state('down', terminal=True)
-        self.assertRaises(excp.InvalidState,
-                          m.add_transition, 'down', 'up', 'jump')
+        self.assertRaises(
+            excp.InvalidState, m.add_transition, 'down', 'up', 'jump'
+        )
 
     def test_duplicate_state(self):
         m = self._create_fsm('unknown')
@@ -158,8 +171,9 @@ class FSMTest(testcase.TestCase):
     def test_duplicate_transition(self):
         m = self.jumper
         m.add_state('side_ways')
-        self.assertRaises(excp.Duplicate,
-                          m.add_transition, 'up', 'side_ways', 'fall')
+        self.assertRaises(
+            excp.Duplicate, m.add_transition, 'up', 'side_ways', 'fall'
+        )
 
     def test_duplicate_transition_replace(self):
         m = self.jumper
@@ -174,20 +188,31 @@ class FSMTest(testcase.TestCase):
         self.assertRaises(
             # Currently duplicate reactions are not allowed...
             excp.Duplicate,
-            self.jumper.add_reaction, 'down', 'fall', lambda *args: 'skate')
+            self.jumper.add_reaction,
+            'down',
+            'fall',
+            lambda *args: 'skate',
+        )
 
     def test_bad_transition(self):
         m = self._create_fsm('unknown')
         m.add_state('fire')
-        self.assertRaises(excp.NotFound, m.add_transition,
-                          'unknown', 'something', 'boom')
-        self.assertRaises(excp.NotFound, m.add_transition,
-                          'something', 'unknown', 'boom')
+        self.assertRaises(
+            excp.NotFound, m.add_transition, 'unknown', 'something', 'boom'
+        )
+        self.assertRaises(
+            excp.NotFound, m.add_transition, 'something', 'unknown', 'boom'
+        )
 
     def test_bad_reaction(self):
         m = self._create_fsm('unknown')
-        self.assertRaises(excp.NotFound, m.add_reaction, 'something', 'boom',
-                          lambda *args: 'cough')
+        self.assertRaises(
+            excp.NotFound,
+            m.add_reaction,
+            'something',
+            'boom',
+            lambda *args: 'cough',
+        )
 
     def test_run(self):
         m = self._create_fsm('down', add_states=['up', 'down'])
@@ -204,8 +229,7 @@ class FSMTest(testcase.TestCase):
         r.run('jump')
         self.assertTrue(m.terminated)
         self.assertEqual('broken', m.current_state)
-        self.assertRaises(excp.InvalidState, r.run,
-                          'jump', initialize=False)
+        self.assertRaises(excp.InvalidState, r.run, 'jump', initialize=False)
 
     def test_on_enter_on_exit(self):
         enter_transitions = []
@@ -229,20 +253,25 @@ class FSMTest(testcase.TestCase):
         m.process_event('beat')
         m.process_event('jump')
         m.process_event('fall')
-        self.assertEqual([('down', 'beat'),
-                          ('up', 'jump'), ('down', 'fall')], enter_transitions)
-        self.assertEqual([('start', 'beat'), ('down', 'jump'), ('up', 'fall')],
-                         exit_transitions)
+        self.assertEqual(
+            [('down', 'beat'), ('up', 'jump'), ('down', 'fall')],
+            enter_transitions,
+        )
+        self.assertEqual(
+            [('start', 'beat'), ('down', 'jump'), ('up', 'fall')],
+            exit_transitions,
+        )
 
     def test_run_iter(self):
         up_downs = []
         runner = runners.FiniteRunner(self.jumper)
-        for (old_state, new_state) in runner.run_iter('jump'):
+        for old_state, new_state in runner.run_iter('jump'):
             up_downs.append((old_state, new_state))
             if len(up_downs) >= 3:
                 break
-        self.assertEqual([('down', 'up'), ('up', 'down'), ('down', 'up')],
-                         up_downs)
+        self.assertEqual(
+            [('down', 'up'), ('up', 'down'), ('down', 'up')], up_downs
+        )
         self.assertFalse(self.jumper.terminated)
         self.assertEqual('up', self.jumper.current_state)
         self.jumper.process_event('fall')
@@ -259,8 +288,9 @@ class FSMTest(testcase.TestCase):
                 break
         self.assertEqual('up', self.jumper.current_state)
         self.assertFalse(self.jumper.terminated)
-        self.assertEqual([('down', 'up'), ('up', 'down'), ('down', 'up')],
-                         up_downs)
+        self.assertEqual(
+            [('down', 'up'), ('up', 'down'), ('down', 'up')], up_downs
+        )
         self.assertRaises(StopIteration, next, it)
 
     def test_run_send_fail(self):
@@ -273,8 +303,9 @@ class FSMTest(testcase.TestCase):
         self.assertEqual([('down', 'up')], up_downs)
 
     def test_not_initialized(self):
-        self.assertRaises(excp.NotInitialized,
-                          self.jumper.process_event, 'jump')
+        self.assertRaises(
+            excp.NotInitialized, self.jumper.process_event, 'jump'
+        )
 
     def test_copy_states(self):
         c = self._create_fsm('down', add_start=False)
@@ -322,11 +353,20 @@ class FSMTest(testcase.TestCase):
     def test_freeze(self):
         self.jumper.freeze()
         self.assertRaises(excp.FrozenMachine, self.jumper.add_state, 'test')
-        self.assertRaises(excp.FrozenMachine,
-                          self.jumper.add_transition, 'test', 'test', 'test')
-        self.assertRaises(excp.FrozenMachine,
-                          self.jumper.add_reaction,
-                          'test', 'test', lambda *args: 'test')
+        self.assertRaises(
+            excp.FrozenMachine,
+            self.jumper.add_transition,
+            'test',
+            'test',
+            'test',
+        )
+        self.assertRaises(
+            excp.FrozenMachine,
+            self.jumper.add_reaction,
+            'test',
+            'test',
+            lambda *args: 'test',
+        )
 
     def test_freeze_copy_unfreeze(self):
         self.jumper.freeze()
@@ -342,10 +382,10 @@ class FSMTest(testcase.TestCase):
 
 
 class HFSMTest(FSMTest):
-
     @staticmethod
-    def _create_fsm(start_state,
-                    add_start=True, hierarchical=False, add_states=None):
+    def _create_fsm(
+        start_state, add_start=True, hierarchical=False, add_states=None
+    ):
         if hierarchical:
             m = machines.HierarchicalFiniteMachine()
         else:
@@ -360,7 +400,6 @@ class HFSMTest(FSMTest):
         return m
 
     def _make_phone_call(self, talk_time=1.0):
-
         def phone_reaction(old_state, new_state, event, chat_iter):
             try:
                 next(chat_iter)
@@ -405,11 +444,13 @@ class HFSMTest(FSMTest):
         number_calling = []
         digits.add_state(
             "accumulate",
-            on_enter=lambda *args: number_calling.append(digit_maker()))
+            on_enter=lambda *args: number_calling.append(digit_maker()),
+        )
         digits.add_transition("idle", "accumulate", "press")
         digits.add_transition("accumulate", "accumulate", "press")
-        digits.add_reaction("accumulate", "press",
-                            react_to_press, number_calling)
+        digits.add_reaction(
+            "accumulate", "press", react_to_press, number_calling
+        )
         digits.add_state("dial", terminal=True)
         digits.add_transition("accumulate", "dial", "call")
         digits.add_reaction("dial", "call", lambda *args: 'ringing')
@@ -440,9 +481,13 @@ class HFSMTest(FSMTest):
         r = runners.HierarchicalRunner(dialer)
         transitions = list(r.run_iter('dial'))
         self.assertEqual(('talk', 'hangup'), transitions[-1])
-        self.assertEqual(len(number_calling),
-                         sum(1 if new_state == 'accumulate' else 0
-                         for (old_state, new_state) in transitions))
+        self.assertEqual(
+            len(number_calling),
+            sum(
+                1 if new_state == 'accumulate' else 0
+                for (old_state, new_state) in transitions
+            ),
+        )
         self.assertEqual(10, len(number_calling))
 
     def test_phone_call(self):

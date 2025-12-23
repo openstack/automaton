@@ -14,14 +14,21 @@
 
 try:
     import pydot
+
     PYDOT_AVAILABLE = True
 except ImportError:
     PYDOT_AVAILABLE = False
 
 
-def convert(machine, graph_name,
-            graph_attrs=None, node_attrs_cb=None, edge_attrs_cb=None,
-            add_start_state=True, name_translations=None):
+def convert(
+    machine,
+    graph_name,
+    graph_attrs=None,
+    node_attrs_cb=None,
+    edge_attrs_cb=None,
+    add_start_state=True,
+    name_translations=None,
+):
     """Translates the state machine into a pydot graph.
 
     :param machine: state machine to convert
@@ -56,9 +63,11 @@ def convert(machine, graph_name,
     :type name_translations: dict
     """
     if not PYDOT_AVAILABLE:
-        raise RuntimeError("pydot (or pydot2 or equivalent) is required"
-                           " to convert a state machine into a pydot"
-                           " graph")
+        raise RuntimeError(
+            "pydot (or pydot2 or equivalent) is required"
+            " to convert a state machine into a pydot"
+            " graph"
+        )
     if not name_translations:
         name_translations = {}
     graph_kwargs = {
@@ -78,15 +87,17 @@ def convert(machine, graph_name,
         'fontsize': '11',
     }
     nodes = {}
-    for (start_state, event, end_state) in machine:
+    for start_state, event, end_state in machine:
         if start_state not in nodes:
             start_node_attrs = node_attrs.copy()
             if node_attrs_cb is not None:
                 start_node_attrs.update(node_attrs_cb(start_state))
-            pretty_start_state = name_translations.get(start_state,
-                                                       start_state)
-            nodes[start_state] = pydot.Node(pretty_start_state,
-                                            **start_node_attrs)
+            pretty_start_state = name_translations.get(
+                start_state, start_state
+            )
+            nodes[start_state] = pydot.Node(
+                pretty_start_state, **start_node_attrs
+            )
             g.add_node(nodes[start_state])
         if end_state not in nodes:
             end_node_attrs = node_attrs.copy()
@@ -98,12 +109,22 @@ def convert(machine, graph_name,
         edge_attrs = {}
         if edge_attrs_cb is not None:
             edge_attrs.update(edge_attrs_cb(start_state, event, end_state))
-        g.add_edge(pydot.Edge(nodes[start_state], nodes[end_state],
-                              **edge_attrs))
+        g.add_edge(
+            pydot.Edge(nodes[start_state], nodes[end_state], **edge_attrs)
+        )
     if add_start_state and machine.default_start_state:
-        start = pydot.Node("__start__", shape="point", width="0.1",
-                           xlabel='start', fontcolor='green', **node_attrs)
+        start = pydot.Node(
+            "__start__",
+            shape="point",
+            width="0.1",
+            xlabel='start',
+            fontcolor='green',
+            **node_attrs,
+        )
         g.add_node(start)
-        g.add_edge(pydot.Edge(start, nodes[machine.default_start_state],
-                              style='dotted'))
+        g.add_edge(
+            pydot.Edge(
+                start, nodes[machine.default_start_state], style='dotted'
+            )
+        )
     return g

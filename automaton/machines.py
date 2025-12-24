@@ -130,8 +130,8 @@ class FiniteMachine:
             raise excp.FrozenMachine()
         if state not in self._states:
             raise excp.NotFound(
-                "Can not set the default start state to"
-                f" undefined state '{state}'"
+                f"Can not set the default start state to undefined state "
+                f"'{state}'"
             )
         self._default_start_state = state
 
@@ -234,8 +234,8 @@ class FiniteMachine:
             raise excp.FrozenMachine()
         if state not in self._states:
             raise excp.NotFound(
-                f"Can not add a reaction to event '{event}' for an"
-                f" undefined state '{state}'"
+                f"Can not add a reaction to event '{event}' for an "
+                f"undefined state '{state}'"
             )
         if not callable(reaction):
             raise ValueError("Reaction callback must be callable")
@@ -261,29 +261,26 @@ class FiniteMachine:
             raise excp.FrozenMachine()
         if start not in self._states:
             raise excp.NotFound(
-                f"Can not add a transition on event '{event}' that"
-                f" starts in a undefined state '{start}'"
+                f"Can not add a transition on event '{event}' that "
+                f"starts in a undefined state '{start}'"
             )
         if end not in self._states:
             raise excp.NotFound(
-                f"Can not add a transition on event '{event}' that"
-                f" ends in a undefined state '{end}'"
+                f"Can not add a transition on event '{event}' that "
+                f"ends in a undefined state '{end}'"
             )
         if self._states[start]['terminal']:
             raise excp.InvalidState(
-                f"Can not add a transition on event '{event}'"
-                f" that starts in the terminal state '{start}'"
+                f"Can not add a transition on event '{event}' "
+                f"that starts in the terminal state '{start}'"
             )
         if event in self._transitions[start] and not replace:
             target = self._transitions[start][event]
             if target.name != end:
                 raise excp.Duplicate(
-                    "Cannot add transition from"
-                    f" '{start}' to '{end}'"
-                    f" on event '{event}' because a"
-                    f" transition from '{start}'"
-                    f" to '{target.name}' on"
-                    f" event '{event}' already exists."
+                    f"Cannot add transition from '{start}' to '{end}' "
+                    f"on event '{event}' because a transition from '{start}' "
+                    f"to '{target.name}' on event '{event}' already exists."
                 )
         else:
             target = _Jump(
@@ -297,18 +294,18 @@ class FiniteMachine:
         current = self._current
         if current is None:
             raise excp.NotInitialized(
-                f"Can not process event '{event}'; the state"
-                " machine hasn't been initialized"
+                f"Can not process event '{event}'; the state machine hasn't "
+                f"been initialized"
             )
         if self._states[current.name]['terminal']:
             raise excp.InvalidState(
-                "Can not transition from terminal"
-                f" state '{current.name}' on event '{event}'"
+                f"Can not transition from terminal state '{current.name}' on "
+                f"event '{event}'"
             )
         if event not in self._transitions[current.name]:
             raise excp.NotFound(
-                f"Can not transition from state '{current.name}' on"
-                f" event '{event}' (no defined transition)"
+                f"Can not transition from state '{current.name}' on event "
+                f"'{event}' (no defined transition)"
             )
 
     def _post_process_event(self, event, result):

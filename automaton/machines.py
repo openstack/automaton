@@ -14,7 +14,7 @@
 
 import collections
 from collections.abc import Callable, Generator, Mapping, Sequence
-from typing import Any, TypedDict
+from typing import Any, Protocol, TypedDict
 
 import prettytable
 from typing_extensions import NotRequired, Self
@@ -91,10 +91,25 @@ class _Jump:
         self.on_exit = on_exit
 
 
+# We can't use ellipsis with concatenate until Python 3.11 so this our
+# workaround
+#
+# https://github.com/python/cpython/pull/30969
+class ReactionProtocol(Protocol):
+    def __call__(
+        self,
+        old_state: str | None,
+        new_state: str | None,
+        event: str,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any: ...
+
+
 class _TrackedState(TypedDict):
     terminal: bool
     reactions: dict[
-        str, tuple[Callable[..., Any], tuple[Any, ...], dict[str, Any]]
+        str, tuple[ReactionProtocol, tuple[Any, ...], dict[str, Any]]
     ]
     on_enter: OnEnterCallbackT
     on_exit: OnExitCallbackT

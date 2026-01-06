@@ -109,7 +109,7 @@ class FiniteMachine:
 
     def __init__(self):
         self._transitions = {}
-        self._states = collections.OrderedDict()
+        self._states = {}
         self._default_start_state = None
         self._current = None
         self.frozen = False
@@ -199,7 +199,7 @@ class FiniteMachine:
             'on_enter': on_enter,
             'on_exit': on_exit,
         }
-        self._transitions[state] = collections.OrderedDict()
+        self._transitions[state] = {}
 
     def is_actionable_event(self, event):
         """Check whether the event is actionable in the current state."""

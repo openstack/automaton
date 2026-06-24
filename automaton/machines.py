@@ -14,10 +14,9 @@
 
 import collections
 from collections.abc import Callable, Generator, Mapping, Sequence
-from typing import Any, Protocol, TypedDict
+from typing import Any, Protocol, NotRequired, Self, TypedDict
 
 import prettytable
-from typing_extensions import NotRequired, Self
 
 from automaton import _utils as utils
 from automaton import exceptions as excp

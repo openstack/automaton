@@ -39,6 +39,19 @@ Repository = "https://opendev.org/openstack/automaton"
 [tool.setuptools.packages.find]
 include = ["automaton"]
 
+[tool.coverage.run]
+source = [
+    "automaton"
+]
+branch = true
+omit = [
+    "automaton/tests/*"
+]
+
+[tool.coverage.report]
+ignore_errors = true
+show_missing = true
+
 [tool.mypy]
 python_version = "3.11"
 show_column_numbers = true

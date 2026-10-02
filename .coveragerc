@@ -1,8 +1,0 @@
-[run]
-branch = True
-source = automaton
-omit = automaton/tests/*
-
-[report]
-ignore_errors = True
-precision = 2

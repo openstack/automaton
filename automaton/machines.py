@@ -282,7 +282,7 @@ class FiniteMachine:
         These callbacks are expected to accept three default positional
         parameters (although more can be passed in via *args and **kwargs,
         these will automatically get provided to the callback when it is
-        activated *ontop* of the three default). The three default parameters
+        activated *on top* of the three default). The three default parameters
         are the last stable state, the new stable state and the event that
         caused the transition to this new stable state to be arrived at.
 

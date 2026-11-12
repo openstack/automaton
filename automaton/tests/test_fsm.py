@@ -70,13 +70,13 @@ class FSMTest(testcase.TestCase):
 
     def test_build_transitions_with_callbacks(self):
         entered = collections.defaultdict(list)
-        exitted = collections.defaultdict(list)
+        exited = collections.defaultdict(list)
 
         def on_enter(state, event):
             entered[state].append(event)
 
         def on_exit(state, event):
-            exitted[state].append(event)
+            exited[state].append(event)
 
         space = [
             machines.State(
@@ -102,12 +102,12 @@ class FSMTest(testcase.TestCase):
         m.initialize()
         m.process_event('jump')
 
-        self.assertEqual({'down': ['jump']}, dict(exitted))
+        self.assertEqual({'down': ['jump']}, dict(exited))
         self.assertEqual({'up': ['jump']}, dict(entered))
 
         m.process_event('fall')
 
-        self.assertEqual({'down': ['jump'], 'up': ['fall']}, dict(exitted))
+        self.assertEqual({'down': ['jump'], 'up': ['fall']}, dict(exited))
         self.assertEqual({'up': ['jump'], 'down': ['fall']}, dict(entered))
 
     def test_build_transitions_dct(self):
